@@ -1,6 +1,6 @@
-import { DeployButton } from "@/components/deploy-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
+import { PinPongMark } from "@/components/pinpong-mark";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
@@ -12,14 +12,31 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
+    <main className="court-stripes min-h-screen flex flex-col items-center">
+      <div className="flex-1 w-full flex flex-col gap-6 items-center sm:gap-10">
+        <nav className="w-full flex min-h-16 justify-center border-b border-b-primary/15 bg-background/85 backdrop-blur">
+          <div className="w-full max-w-6xl flex justify-between items-center gap-3 p-3 px-4 text-sm sm:px-5">
+            <div className="flex min-w-0 gap-5 items-center font-semibold">
+              <Link href={"/"} className="flex min-w-0 items-center gap-2">
+                <PinPongMark animated className="size-8" />
+                <span className="truncate">Chartwell PinPong</span>
+              </Link>
+              <div className="hidden items-center gap-3 text-xs font-medium text-muted-foreground sm:flex">
+                <Link className="hover:text-foreground" href="/protected">
+                  Dashboard
+                </Link>
+                <Link className="hover:text-foreground" href="/protected/profile">
+                  Profile
+                </Link>
+                <Link className="hover:text-foreground" href="/protected/invites">
+                  Invites
+                </Link>
+                <Link className="hover:text-foreground" href="/protected/tournaments">
+                  Tournaments
+                </Link>
+                <Link className="hover:text-foreground" href="/protected/guide">
+                  How it works
+                </Link>
               </div>
             </div>
             {!hasEnvVars ? (
@@ -31,22 +48,12 @@ export default function ProtectedLayout({
             )}
           </div>
         </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
+        <div className="flex-1 flex w-full max-w-6xl flex-col px-4 py-2 sm:p-5">
           {children}
         </div>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
+        <footer className="w-full flex items-center justify-center border-t border-t-primary/15 mx-auto text-center text-xs gap-8 py-6 sm:py-8">
+          <p>Chartwell PinPong</p>
           <ThemeSwitcher />
         </footer>
       </div>
