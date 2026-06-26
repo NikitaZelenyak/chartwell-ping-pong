@@ -199,6 +199,22 @@ async function Tournaments() {
                   <option value="single_elimination">Knockout bracket</option>
                   <option value="round_robin">Round robin</option>
                 </select>
+                <div className="rounded-md border border-primary/15 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
+                  <p>
+                    <span className="font-medium text-foreground">
+                      Knockout bracket:
+                    </span>{" "}
+                    players are paired each round, winners keep advancing, and
+                    one loss removes a player from the title race.
+                  </p>
+                  <p className="mt-1">
+                    <span className="font-medium text-foreground">
+                      Round robin:
+                    </span>{" "}
+                    every player plays every other player, so it takes longer
+                    but gives the fairest full ranking.
+                  </p>
+                </div>
               </div>
               <AvatarPicker
                 label="Tournament avatar"
