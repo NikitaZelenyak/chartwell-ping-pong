@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
   CardContent,
@@ -198,11 +199,7 @@ rating_delta = max(1, round(32 * (1 - expected)))`}
 }
 
 function GuideFallback() {
-  return (
-    <div className="grid min-h-[24rem] place-items-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground sm:min-h-[40rem]">
-      Loading guide...
-    </div>
-  );
+  return <PingPongLoader label="Loading guide..." />;
 }
 
 function WorkflowCard({

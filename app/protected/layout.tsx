@@ -26,13 +26,16 @@ export default function ProtectedLayout({
                 <ProtectedNavLinks />
               </Suspense>
             </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
+            <div className="flex shrink-0 items-center gap-2">
+              <ThemeSwitcher />
+              {!hasEnvVars ? (
+                <EnvVarWarning />
+              ) : (
+                <Suspense>
+                  <AuthButton />
+                </Suspense>
+              )}
+            </div>
           </div>
         </nav>
         <div className="flex-1 flex w-full max-w-6xl flex-col px-4 py-2 sm:p-5">
@@ -41,7 +44,6 @@ export default function ProtectedLayout({
 
         <footer className="w-full flex items-center justify-center border-t border-t-primary/15 mx-auto text-center text-xs gap-8 py-6 sm:py-8">
           <p>Chartwell Ping Pong</p>
-          <ThemeSwitcher />
         </footer>
       </div>
     </main>

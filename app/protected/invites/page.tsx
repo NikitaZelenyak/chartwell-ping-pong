@@ -4,6 +4,7 @@ import { Check, Pencil, Send, ShieldAlert, Swords, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
   CardContent,
@@ -290,11 +291,7 @@ async function InvitesContent() {
 }
 
 function InvitesFallback() {
-  return (
-    <div className="grid min-h-[24rem] place-items-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground">
-      Loading invites...
-    </div>
-  );
+  return <PingPongLoader label="Loading invites..." className="sm:min-h-[24rem]" />;
 }
 
 function Stat({ label, value }: { label: string; value: number }) {

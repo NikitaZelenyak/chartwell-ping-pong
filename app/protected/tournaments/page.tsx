@@ -10,6 +10,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
   CardContent,
@@ -331,11 +332,7 @@ async function Tournaments() {
 }
 
 function TournamentFallback() {
-  return (
-    <div className="grid min-h-[24rem] place-items-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground sm:min-h-[40rem]">
-      Loading tournaments...
-    </div>
-  );
+  return <PingPongLoader label="Loading tournaments..." />;
 }
 
 function Field({

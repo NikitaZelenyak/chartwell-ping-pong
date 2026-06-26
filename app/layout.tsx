@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "Chartwell Ping Pong",
   description:
     "Tournament registration, match invites, player profiles, and ratings for Chartwell Ping Pong.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

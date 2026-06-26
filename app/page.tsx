@@ -12,6 +12,7 @@ import { Suspense } from "react";
 
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
+import { PingPongLoader } from "@/components/ping-pong-loader";
 import { PinPongMark } from "@/components/pinpong-mark";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Badge } from "@/components/ui/badge";
@@ -135,13 +136,16 @@ async function HomeContent() {
             <PinPongMark animated />
             <span className="truncate">Chartwell Ping Pong</span>
           </Link>
-          {!hasEnvVars ? (
-            <EnvVarWarning />
-          ) : (
-            <Suspense>
-              <AuthButton />
-            </Suspense>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            <ThemeSwitcher />
+            {!hasEnvVars ? (
+              <EnvVarWarning />
+            ) : (
+              <Suspense>
+                <AuthButton />
+              </Suspense>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -291,18 +295,13 @@ async function HomeContent() {
 
       <footer className="flex items-center justify-center gap-8 border-t py-8 text-xs">
         <p>Chartwell Ping Pong</p>
-        <ThemeSwitcher />
       </footer>
     </main>
   );
 }
 
 function HomeSkeleton() {
-  return (
-    <main className="grid min-h-screen place-items-center bg-background px-4 text-sm text-muted-foreground">
-      Loading Chartwell Ping Pong...
-    </main>
-  );
+  return <PingPongLoader label="Loading Chartwell Ping Pong..." />;
 }
 
 function LeaderboardAvatar({ player }: { player: HomeProfile }) {

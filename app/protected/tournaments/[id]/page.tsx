@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays, MapPin, ShieldAlert, Trophy } from "lucide-rea
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
   CardContent,
@@ -271,11 +272,7 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
 }
 
 function TournamentDetailFallback() {
-  return (
-    <div className="grid min-h-[24rem] place-items-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground">
-      Loading tournament...
-    </div>
-  );
+  return <PingPongLoader label="Loading tournament..." className="sm:min-h-[24rem]" />;
 }
 
 function InfoLine({

@@ -87,6 +87,10 @@
     animation: ping-pong-ball 1.4s ease-in-out infinite;
   }
 
+  .animate-loader-ball {
+    animation: loader-ball 920ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
   .animate-court-ball {
     animation: court-ball 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   }
@@ -225,6 +229,19 @@
   }
   58% {
     transform: translate3d(-1px, 1px, 0) scale(0.98);
+  }
+}
+
+@keyframes loader-ball {
+  0%,
+  100% {
+    transform: translate3d(-50%, 0, 0) scale(1, 1);
+  }
+  48% {
+    transform: translate3d(-50%, 36px, 0) scale(1.08, 0.92);
+  }
+  58% {
+    transform: translate3d(-50%, 31px, 0) scale(0.94, 1.08);
   }
 }
 

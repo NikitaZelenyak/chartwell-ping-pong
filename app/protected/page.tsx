@@ -12,6 +12,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PingPongLoader } from "@/components/ping-pong-loader";
 import { RecentResults } from "@/components/recent-results";
 import {
   Card,
@@ -502,11 +503,7 @@ async function Dashboard() {
 }
 
 function DashboardFallback() {
-  return (
-    <div className="grid min-h-[24rem] place-items-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground sm:min-h-[40rem]">
-      Loading Chartwell Ping Pong dashboard...
-    </div>
-  );
+  return <PingPongLoader label="Loading Chartwell Ping Pong dashboard..." />;
 }
 
 function StatTile({
