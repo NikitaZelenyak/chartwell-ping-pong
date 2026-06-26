@@ -12,6 +12,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RecentResults } from "@/components/recent-results";
 import {
   Card,
   CardContent,
@@ -199,7 +200,7 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
         "id,player_one_id,player_two_id,winner_id,loser_id,player_one_score,player_two_score,score_summary,rating_delta,tournament_id,created_at",
       )
       .order("created_at", { ascending: false })
-      .limit(8),
+      .limit(50),
     supabase
       .from("match_reports")
       .select(
@@ -261,6 +262,23 @@ async function Dashboard() {
     (invite) => invite.status === "pending",
   );
   const pendingReports = data.reports.filter((report) => report.status === "pending");
+  const recentResults = data.matches.map((match) => {
+    const playerOne = profilesById.get(match.player_one_id);
+    const playerTwo = profilesById.get(match.player_two_id);
+    const winner = profilesById.get(match.winner_id);
+
+    return {
+      id: match.id,
+      playerOne: displayPlayer(playerOne),
+      playerTwo: displayPlayer(playerTwo),
+      winner: displayPlayer(winner),
+      score:
+        match.score_summary ||
+        `${match.player_one_score ?? 0}-${match.player_two_score ?? 0}`,
+      date: formatDate(match.created_at),
+      ratingDelta: match.rating_delta ?? 0,
+    };
+  });
 
   return (
     <div className="w-full space-y-6 sm:space-y-10">
@@ -474,39 +492,8 @@ async function Dashboard() {
             </CardTitle>
             <CardDescription>Latest completed rated matches.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {data.matches.map((match) => {
-              const playerOne = profilesById.get(match.player_one_id);
-              const playerTwo = profilesById.get(match.player_two_id);
-              const winner = profilesById.get(match.winner_id);
-
-              return (
-                <div className="rounded-md border p-4" key={match.id}>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="break-words font-medium">
-                        {displayPlayer(playerOne)} vs {displayPlayer(playerTwo)}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Winner: {displayPlayer(winner)}
-                      </p>
-                    </div>
-                    <Badge variant="secondary">
-                      {match.rating_delta && match.rating_delta > 0 ? "+" : ""}
-                      {match.rating_delta ?? 0}
-                    </Badge>
-                  </div>
-                  <p className="mt-3 break-words text-sm text-muted-foreground">
-                    {match.score_summary ||
-                      `${match.player_one_score ?? 0}-${match.player_two_score ?? 0}`}{" "}
-                    · {formatDate(match.created_at)}
-                  </p>
-                </div>
-              );
-            })}
-            {data.matches.length === 0 ? (
-              <EmptyState text="No match results reported yet." />
-            ) : null}
+          <CardContent>
+            <RecentResults results={recentResults} />
           </CardContent>
         </Card>
       </section>

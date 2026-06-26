@@ -216,7 +216,7 @@ export async function startTournament(formData: FormData) {
 
   const { data: tournament, error: tournamentError } = await supabase
     .from("tournaments")
-    .select("id,organizer_id,format")
+    .select("id,organizer_id,format,max_players")
     .eq("id", tournamentId)
     .single();
 
@@ -239,9 +239,12 @@ export async function startTournament(formData: FormData) {
   }
 
   const playerIds = (entries ?? []).map((entry) => entry.user_id);
+  const requiredPlayers = tournament.max_players ?? 2;
 
-  if (playerIds.length < 2) {
-    throw new Error("At least two registered players are required.");
+  if (playerIds.length < requiredPlayers) {
+    throw new Error(
+      `This tournament needs ${requiredPlayers} registered players before it can start.`,
+    );
   }
 
   const { error: deleteError } = await supabase
@@ -452,6 +455,34 @@ export async function joinTournament(formData: FormData) {
 
   if (!tournamentId) {
     throw new Error("Tournament is required.");
+  }
+
+  const { data: tournament, error: tournamentError } = await supabase
+    .from("tournaments")
+    .select("id,max_players,status")
+    .eq("id", tournamentId)
+    .single();
+
+  if (tournamentError || !tournament) {
+    throw new Error(tournamentError?.message ?? "Tournament not found.");
+  }
+
+  if (tournament.status !== "open") {
+    throw new Error("This tournament is not open for registration.");
+  }
+
+  const { count, error: countError } = await supabase
+    .from("tournament_entries")
+    .select("user_id", { count: "exact", head: true })
+    .eq("tournament_id", tournamentId)
+    .eq("status", "registered");
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  if ((count ?? 0) >= (tournament.max_players ?? 2)) {
+    throw new Error("This tournament is already full.");
   }
 
   const { error } = await supabase.from("tournament_entries").upsert(

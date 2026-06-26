@@ -234,6 +234,9 @@ async function Tournaments() {
                 (entry) => entry.tournament_id === tournament.id,
               ).length;
               const joined = myEntries.has(tournament.id);
+              const requiredPlayers = tournament.max_players ?? 2;
+              const canStart = playerCount >= requiredPlayers;
+              const isFull = playerCount >= requiredPlayers;
 
               return (
                 <div
@@ -280,7 +283,7 @@ async function Tournaments() {
                     </p>
                   </Link>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    {!joined && tournament.status === "open" ? (
+                    {!joined && tournament.status === "open" && !isFull ? (
                       <form action={joinTournament}>
                         <input type="hidden" name="tournament_id" value={tournament.id} />
                         <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
@@ -288,18 +291,29 @@ async function Tournaments() {
                         </Button>
                       </form>
                     ) : null}
+                    {!joined && tournament.status === "open" && isFull ? (
+                      <Badge variant="outline">Full</Badge>
+                    ) : null}
                     {tournament.organizer_id === user.id && tournament.status === "open" ? (
-                      <form action={startTournament}>
-                        <input type="hidden" name="tournament_id" value={tournament.id} />
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="w-full sm:w-auto"
-                          disabled={playerCount < 2}
-                        >
-                          Start tournament
-                        </Button>
-                      </form>
+                      <div className="grid gap-1">
+                        <form action={startTournament}>
+                          <input type="hidden" name="tournament_id" value={tournament.id} />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            className="w-full sm:w-auto"
+                            disabled={!canStart}
+                          >
+                            Start tournament
+                          </Button>
+                        </form>
+                        {!canStart ? (
+                          <p className="text-xs text-muted-foreground">
+                            Needs {requiredPlayers - playerCount} more player
+                            {requiredPlayers - playerCount === 1 ? "" : "s"}.
+                          </p>
+                        ) : null}
+                      </div>
                     ) : null}
                   </div>
                 </div>

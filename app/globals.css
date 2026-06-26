@@ -124,10 +124,59 @@
   }
 
   .court-stripes {
+    background-color: hsl(var(--background));
     background-image:
-      linear-gradient(90deg, hsl(var(--primary) / 0.12) 1px, transparent 1px),
-      linear-gradient(0deg, hsl(var(--primary) / 0.08) 1px, transparent 1px);
-    background-size: 34px 34px;
+      radial-gradient(
+        circle at 12% 18%,
+        hsl(var(--chart-4) / 0.24) 0 0.55rem,
+        transparent 0.6rem
+      ),
+      radial-gradient(
+        circle at 82% 32%,
+        hsl(var(--chart-3) / 0.18) 0 0.5rem,
+        transparent 0.55rem
+      ),
+      radial-gradient(
+        circle at 30% 78%,
+        hsl(var(--chart-2) / 0.15) 0 0.38rem,
+        transparent 0.42rem
+      ),
+      repeating-radial-gradient(
+        circle at 78% 18%,
+        hsl(var(--primary) / 0.12) 0 1px,
+        transparent 1px 14px
+      ),
+      linear-gradient(
+        118deg,
+        transparent 0 12%,
+        hsl(var(--primary) / 0.08) 12.2% 12.6%,
+        transparent 12.8% 38%,
+        hsl(var(--accent) / 0.26) 38.2% 54%,
+        transparent 54.4% 100%
+      ),
+      linear-gradient(
+        152deg,
+        hsl(var(--secondary) / 0.26),
+        transparent 30%,
+        hsl(var(--chart-2) / 0.10) 72%,
+        transparent
+      );
+    background-attachment: fixed;
+    background-position:
+      left 3rem top 5rem,
+      right 9rem top 13rem,
+      left 28% bottom 8rem,
+      right 3rem top 4rem,
+      center top,
+      center;
+    background-repeat: no-repeat;
+    background-size:
+      10rem 10rem,
+      12rem 12rem,
+      8rem 8rem,
+      16rem 16rem,
+      100% 46rem,
+      100% 100%;
   }
 }
 

@@ -141,6 +141,9 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
   const isOrganizer = data.tournament.organizer_id === user.id;
   const isParticipant = data.entries.some((entry) => entry.user_id === user.id);
   const playerCount = data.entries.length;
+  const requiredPlayers = data.tournament.max_players ?? 2;
+  const canStart = playerCount >= requiredPlayers;
+  const isFull = playerCount >= requiredPlayers;
   const canViewManager = isOrganizer || isParticipant;
 
   return (
@@ -196,7 +199,10 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
           </div>
 
           <div className="grid gap-2 sm:min-w-44">
-            {!isParticipant && !isOrganizer && data.tournament.status === "open" ? (
+            {!isParticipant &&
+            !isOrganizer &&
+            data.tournament.status === "open" &&
+            !isFull ? (
               <form action={joinTournament}>
                 <input type="hidden" name="tournament_id" value={data.tournament.id} />
                 <Button type="submit" className="w-full">
@@ -204,17 +210,32 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
                 </Button>
               </form>
             ) : null}
+            {!isParticipant &&
+            !isOrganizer &&
+            data.tournament.status === "open" &&
+            isFull ? (
+              <Badge variant="outline">Tournament full</Badge>
+            ) : null}
             {isOrganizer && data.tournament.status === "open" ? (
-              <form action={startTournament}>
-                <input type="hidden" name="tournament_id" value={data.tournament.id} />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={playerCount < 2}
-                >
-                  Start tournament
-                </Button>
-              </form>
+              <div className="grid gap-1">
+                <form action={startTournament}>
+                  <input type="hidden" name="tournament_id" value={data.tournament.id} />
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={!canStart}
+                  >
+                    Start tournament
+                  </Button>
+                </form>
+                {!canStart ? (
+                  <p className="text-xs text-muted-foreground">
+                    Needs {requiredPlayers - playerCount} more player
+                    {requiredPlayers - playerCount === 1 ? "" : "s"} before it
+                    can start.
+                  </p>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </div>
