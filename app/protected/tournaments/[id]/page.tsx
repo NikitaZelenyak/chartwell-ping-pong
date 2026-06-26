@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, CalendarDays, MapPin, ShieldAlert, Trophy } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  Save,
+  MapPin,
+  Settings,
+  ShieldAlert,
+  Trash2,
+  Trophy,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,9 +22,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { APP_TIME_ZONE } from "@/lib/datetime";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { APP_TIME_ZONE, isoToDateTimeLocal } from "@/lib/datetime";
 import { createClient } from "@/lib/supabase/server";
-import { joinTournament, startTournament } from "../../actions";
+import {
+  deleteTournament,
+  joinTournament,
+  startTournament,
+  updateTournamentSettings,
+} from "../../actions";
 import {
   TournamentManager,
   type TournamentManagerEntry,
@@ -241,6 +257,88 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
           </div>
         </div>
       </section>
+
+      {isOrganizer ? (
+        <Card className="rounded-md shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Settings className="size-5" />
+              Tournament settings
+            </CardTitle>
+            <CardDescription>
+              Change the start time or player cap. The cap cannot be lower than
+              the number of registered players.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <form
+              action={updateTournamentSettings}
+              className="grid gap-4 rounded-md border border-primary/15 bg-muted/30 p-4"
+            >
+              <input type="hidden" name="tournament_id" value={data.tournament.id} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="starts_at">Start time</Label>
+                  <Input
+                    id="starts_at"
+                    name="starts_at"
+                    type="datetime-local"
+                    defaultValue={isoToDateTimeLocal(data.tournament.starts_at)}
+                    disabled={["completed", "cancelled"].includes(
+                      data.tournament.status ?? "",
+                    )}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="max_players">Max players</Label>
+                  <Input
+                    id="max_players"
+                    name="max_players"
+                    type="number"
+                    defaultValue={data.tournament.max_players ?? requiredPlayers}
+                    min={Math.max(2, playerCount)}
+                    disabled={["completed", "cancelled"].includes(
+                      data.tournament.status ?? "",
+                    )}
+                  />
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    {playerCount > 0
+                      ? `Minimum is ${Math.max(2, playerCount)} because ${playerCount} player${playerCount === 1 ? "" : "s"} already registered.`
+                      : "Minimum is 2 players."}
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="submit"
+                className="w-full sm:w-auto"
+                disabled={["completed", "cancelled"].includes(
+                  data.tournament.status ?? "",
+                )}
+              >
+                <Save className="size-4" />
+                Save tournament settings
+              </Button>
+            </form>
+
+            <form action={deleteTournament} className="rounded-md border border-destructive/25 bg-destructive/5 p-4">
+              <input type="hidden" name="tournament_id" value={data.tournament.id} />
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-medium">Remove tournament</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    This removes the tournament, its registrations, and its match
+                    board. Existing match history stays in ratings history.
+                  </p>
+                </div>
+                <Button type="submit" variant="destructive" className="w-full sm:w-auto">
+                  <Trash2 className="size-4" />
+                  Remove tournament
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {canViewManager ? (
         <TournamentManager

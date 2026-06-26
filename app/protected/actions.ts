@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { safeAvatarSeed, safeAvatarStyle } from "@/lib/avatars";
 import { dateTimeLocalToIso } from "@/lib/datetime";
@@ -108,6 +109,94 @@ export async function createTournament(formData: FormData) {
 
   revalidatePath("/protected");
   revalidatePath("/protected/tournaments");
+}
+
+export async function updateTournamentSettings(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const tournamentId = cleanString(formData.get("tournament_id"));
+
+  if (!tournamentId) {
+    throw new Error("Tournament is required.");
+  }
+
+  const { data: tournament, error: tournamentError } = await supabase
+    .from("tournaments")
+    .select("id,organizer_id,status,max_players")
+    .eq("id", tournamentId)
+    .single();
+
+  if (tournamentError || !tournament) {
+    throw new Error(tournamentError?.message ?? "Tournament not found.");
+  }
+
+  if (tournament.organizer_id !== user.id) {
+    throw new Error("Only the organizer can update this tournament.");
+  }
+
+  if (["completed", "cancelled"].includes(tournament.status ?? "")) {
+    throw new Error("Completed or cancelled tournaments cannot be changed.");
+  }
+
+  const { count, error: countError } = await supabase
+    .from("tournament_entries")
+    .select("user_id", { count: "exact", head: true })
+    .eq("tournament_id", tournamentId)
+    .eq("status", "registered");
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  const registeredPlayers = count ?? 0;
+  const maxPlayers = Math.trunc(cleanNumber(formData.get("max_players"), tournament.max_players ?? 2));
+  const minimumPlayers = Math.max(2, registeredPlayers);
+
+  if (maxPlayers < minimumPlayers) {
+    throw new Error(
+      `Max players cannot be lower than the ${registeredPlayers} player${registeredPlayers === 1 ? "" : "s"} already registered.`,
+    );
+  }
+
+  const { error } = await supabase
+    .from("tournaments")
+    .update({
+      starts_at: dateTimeLocalToIso(cleanString(formData.get("starts_at"))),
+      max_players: maxPlayers,
+    })
+    .eq("id", tournamentId)
+    .eq("organizer_id", user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
+  revalidatePath(`/protected/tournaments/${tournamentId}`);
+}
+
+export async function deleteTournament(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const tournamentId = cleanString(formData.get("tournament_id"));
+
+  if (!tournamentId) {
+    throw new Error("Tournament is required.");
+  }
+
+  const { error } = await supabase
+    .from("tournaments")
+    .delete()
+    .eq("id", tournamentId)
+    .eq("organizer_id", user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
+  revalidatePath(`/protected/tournaments/${tournamentId}`);
+  redirect("/protected/tournaments");
 }
 
 function nextPowerOfTwo(value: number) {
@@ -547,6 +636,28 @@ export async function updateInvite(formData: FormData) {
     .eq("id", inviteId)
     .eq("created_by", user.id)
     .in("status", ["pending", "accepted"]);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/invites");
+  revalidatePath("/protected");
+}
+
+export async function deleteInvite(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const inviteId = cleanString(formData.get("invite_id"));
+
+  if (!inviteId) {
+    throw new Error("Invite is required.");
+  }
+
+  const { error } = await supabase
+    .from("match_invites")
+    .delete()
+    .eq("id", inviteId)
+    .or(`created_by.eq.${user.id},opponent_id.eq.${user.id}`);
 
   if (error) {
     throw new Error(error.message);

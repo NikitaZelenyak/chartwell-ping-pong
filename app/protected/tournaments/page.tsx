@@ -5,6 +5,7 @@ import {
   CalendarDays,
   MapPin,
   ShieldAlert,
+  Trash2,
   Trophy,
 } from "lucide-react";
 
@@ -32,6 +33,7 @@ import { APP_TIME_ZONE } from "@/lib/datetime";
 import { createClient } from "@/lib/supabase/server";
 import {
   createTournament,
+  deleteTournament,
   joinTournament,
   startTournament,
 } from "../actions";
@@ -331,6 +333,20 @@ async function Tournaments() {
                           </p>
                         ) : null}
                       </div>
+                    ) : null}
+                    {tournament.organizer_id === user.id ? (
+                      <form action={deleteTournament}>
+                        <input type="hidden" name="tournament_id" value={tournament.id} />
+                        <Button
+                          type="submit"
+                          size="sm"
+                          variant="destructive"
+                          className="w-full sm:w-auto"
+                        >
+                          <Trash2 className="size-4" />
+                          Remove
+                        </Button>
+                      </form>
                     ) : null}
                   </div>
                 </div>

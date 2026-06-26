@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Check, Pencil, Send, ShieldAlert, Swords, X } from "lucide-react";
+import { Check, Pencil, Send, ShieldAlert, Swords, Trash2, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
 } from "@/lib/datetime";
 import { createClient } from "@/lib/supabase/server";
 import {
+  deleteInvite,
   respondToInvite,
   sendInvite,
   submitCasualMatchReport,
@@ -263,18 +264,30 @@ async function InvitesContent() {
                           icon={<X className="size-4" />}
                         />
                       )}
+                      <DeleteInviteAction inviteId={invite.id} />
                     </div>
                   ) : null}
 
                   {invite.status === "accepted" ? (
-                    <InviteResultForm
-                      inviteId={invite.id}
-                      opponentId={isIncoming ? invite.created_by : invite.opponent_id}
-                      currentPlayerLabel={
-                        myProfile ? displayPlayer(myProfile) : user.email || "Me"
-                      }
-                      opponentLabel={displayPlayer(otherPlayer)}
-                    />
+                    <>
+                      <InviteResultForm
+                        inviteId={invite.id}
+                        opponentId={isIncoming ? invite.created_by : invite.opponent_id}
+                        currentPlayerLabel={
+                          myProfile ? displayPlayer(myProfile) : user.email || "Me"
+                        }
+                        opponentLabel={displayPlayer(otherPlayer)}
+                      />
+                      <div className="mt-3">
+                        <DeleteInviteAction inviteId={invite.id} />
+                      </div>
+                    </>
+                  ) : null}
+
+                  {invite.status !== "pending" && invite.status !== "accepted" ? (
+                    <div className="mt-4">
+                      <DeleteInviteAction inviteId={invite.id} />
+                    </div>
                   ) : null}
                 </div>
               );
@@ -459,6 +472,18 @@ function InviteAction({
       <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
         {icon}
         {label}
+      </Button>
+    </form>
+  );
+}
+
+function DeleteInviteAction({ inviteId }: { inviteId: string }) {
+  return (
+    <form action={deleteInvite} className="w-full sm:w-auto">
+      <input type="hidden" name="invite_id" value={inviteId} />
+      <Button type="submit" size="sm" variant="destructive" className="w-full sm:w-auto">
+        <Trash2 className="size-4" />
+        Remove invite
       </Button>
     </form>
   );
