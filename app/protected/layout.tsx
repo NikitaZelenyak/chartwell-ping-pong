@@ -22,7 +22,9 @@ export default function ProtectedLayout({
                 <PinPongMark animated className="size-8" />
                 <span className="truncate">Chartwell Ping Pong</span>
               </Link>
-              <ProtectedNavLinks />
+              <Suspense fallback={null}>
+                <ProtectedNavLinks />
+              </Suspense>
             </div>
             {!hasEnvVars ? (
               <EnvVarWarning />

@@ -1,12 +1,10 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Suspense } from "react";
 import {
   CalendarDays,
-  CheckCircle2,
-  Clock3,
   MapPin,
   ShieldAlert,
-  Swords,
   Trophy,
 } from "lucide-react";
 
@@ -34,19 +32,8 @@ import { createClient } from "@/lib/supabase/server";
 import {
   createTournament,
   joinTournament,
-  reportTournamentGame,
   startTournament,
-  updateTournamentGame,
 } from "../actions";
-
-type Profile = {
-  id: string;
-  email: string | null;
-  display_name: string | null;
-  rating: number | null;
-  avatar_style: string | null;
-  avatar_seed: string | null;
-};
 
 type Tournament = {
   id: string;
@@ -69,35 +56,14 @@ type TournamentEntry = {
   status: string | null;
 };
 
-type TournamentGame = {
-  id: string;
-  tournament_id: string;
-  round_number: number;
-  game_number: number;
-  player_one_id: string | null;
-  player_two_id: string | null;
-  winner_id: string | null;
-  status: string | null;
-};
-
 type TournamentsData = {
-  profiles: Profile[];
   tournaments: Tournament[];
   entries: TournamentEntry[];
-  games: TournamentGame[];
   setupError: string | null;
 };
 
 const selectControlClass =
   "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
-
-function displayPlayer(profile?: Profile) {
-  if (!profile) {
-    return "Unknown player";
-  }
-
-  return profile.display_name || profile.email || "Player";
-}
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -121,12 +87,8 @@ async function loadTournamentsData(): Promise<TournamentsData> {
   const supabase = await createClient();
   const setupErrors: string[] = [];
 
-  const [profilesResult, tournamentsResult, entriesResult, gamesResult] =
+  const [tournamentsResult, entriesResult] =
     await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id,email,display_name,rating,avatar_style,avatar_seed")
-        .order("rating", { ascending: false }),
       supabase
         .from("tournaments")
         .select(
@@ -136,20 +98,11 @@ async function loadTournamentsData(): Promise<TournamentsData> {
       supabase
         .from("tournament_entries")
         .select("tournament_id,user_id,status"),
-      supabase
-        .from("tournament_games")
-        .select(
-          "id,tournament_id,round_number,game_number,player_one_id,player_two_id,winner_id,status",
-        )
-        .order("round_number", { ascending: true })
-        .order("game_number", { ascending: true }),
     ]);
 
   for (const result of [
-    profilesResult,
     tournamentsResult,
     entriesResult,
-    gamesResult,
   ]) {
     if (result.error) {
       setupErrors.push(result.error.message);
@@ -157,10 +110,8 @@ async function loadTournamentsData(): Promise<TournamentsData> {
   }
 
   return {
-    profiles: (profilesResult.data ?? []) as Profile[],
     tournaments: (tournamentsResult.data ?? []) as Tournament[],
     entries: (entriesResult.data ?? []) as TournamentEntry[],
-    games: (gamesResult.data ?? []) as TournamentGame[],
     setupError: setupErrors[0] ?? null,
   };
 }
@@ -285,38 +236,49 @@ async function Tournaments() {
               const joined = myEntries.has(tournament.id);
 
               return (
-                <div className="rounded-md border p-4" key={tournament.id}>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 gap-3">
-                      <AvatarThumb
-                        styleName={tournament.avatar_style}
-                        seed={tournament.avatar_seed ?? tournament.id}
-                        label={tournament.name}
-                        className="size-12"
-                      />
-                      <div className="min-w-0">
-                        <h3 className="break-words font-semibold">{tournament.name}</h3>
-                        <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="size-4" />
-                          {tournament.venue || "Venue to be announced"}
-                        </p>
+                <div
+                  className="rounded-md border p-4 transition hover:border-primary/35 hover:shadow-md"
+                  key={tournament.id}
+                >
+                  <Link
+                    className="block"
+                    href={`/protected/tournaments/${tournament.id}`}
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-1 gap-3">
+                        <AvatarThumb
+                          styleName={tournament.avatar_style}
+                          seed={tournament.avatar_seed ?? tournament.id}
+                          label={tournament.name}
+                          className="size-12"
+                        />
+                        <div className="min-w-0">
+                          <h3 className="break-words font-semibold">{tournament.name}</h3>
+                          <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="size-4" />
+                            {tournament.venue || "Venue to be announced"}
+                          </p>
+                        </div>
                       </div>
+                      <Badge variant={joined ? "default" : "secondary"}>
+                        {joined ? "Joined" : tournament.status}
+                      </Badge>
                     </div>
-                    <Badge variant={joined ? "default" : "secondary"}>
-                      {joined ? "Joined" : tournament.status}
-                    </Badge>
-                  </div>
-                  <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
-                    <InfoItem label="Starts" value={formatDate(tournament.starts_at)} />
-                    <InfoItem
-                      label="Format"
-                      value={formatTournamentFormat(tournament.format)}
-                    />
-                    <InfoItem
-                      label="Players"
-                      value={`${playerCount}/${tournament.max_players ?? "?"}`}
-                    />
-                  </div>
+                    <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+                      <InfoItem label="Starts" value={formatDate(tournament.starts_at)} />
+                      <InfoItem
+                        label="Format"
+                        value={formatTournamentFormat(tournament.format)}
+                      />
+                      <InfoItem
+                        label="Players"
+                        value={`${playerCount}/${tournament.max_players ?? "?"}`}
+                      />
+                    </div>
+                    <p className="mt-4 text-xs font-medium text-primary">
+                      Open tournament board
+                    </p>
+                  </Link>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                     {!joined && tournament.status === "open" ? (
                       <form action={joinTournament}>
@@ -350,13 +312,6 @@ async function Tournaments() {
         </Card>
       </section>
 
-      <TournamentManager
-        entries={data.entries}
-        games={data.games}
-        profiles={data.profiles}
-        tournaments={data.tournaments}
-        userId={user.id}
-      />
     </div>
   );
 }
@@ -471,312 +426,6 @@ function AvatarPicker({
         ))}
       </div>
     </div>
-  );
-}
-
-function TournamentManager({
-  entries,
-  games,
-  profiles,
-  tournaments,
-  userId,
-}: {
-  entries: TournamentEntry[];
-  games: TournamentGame[];
-  profiles: Profile[];
-  tournaments: Tournament[];
-  userId: string;
-}) {
-  const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
-  const visibleTournaments = tournaments.filter((tournament) => {
-    const hasGames = games.some((game) => game.tournament_id === tournament.id);
-    return tournament.organizer_id === userId && hasGames;
-  });
-
-  if (visibleTournaments.length === 0) {
-    return null;
-  }
-
-  return (
-    <Card className="rounded-md shadow-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-          <Swords className="size-5" />
-          Tournament manager
-        </CardTitle>
-        <CardDescription>
-          Edit pairings and report winners. Knockout winners advance to the next
-          game automatically.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {visibleTournaments.map((tournament) => {
-          const tournamentGames = games.filter(
-            (game) => game.tournament_id === tournament.id,
-          );
-          const completedGames = tournamentGames.filter(
-            (game) => game.status === "completed",
-          ).length;
-          const players = entries
-            .filter((entry) => entry.tournament_id === tournament.id)
-            .map((entry) => profilesById.get(entry.user_id))
-            .filter((profile): profile is Profile => Boolean(profile));
-          const rounds = Array.from(
-            new Set(tournamentGames.map((game) => game.round_number)),
-          ).sort((first, second) => first - second);
-
-          return (
-            <div className="overflow-hidden rounded-md border bg-background" key={tournament.id}>
-              <div className="border-b bg-muted/35 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold">{tournament.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {formatTournamentFormat(tournament.format)} · {tournament.status}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{players.length} players</Badge>
-                    <Badge variant="outline">
-                      {completedGames}/{tournamentGames.length} complete
-                    </Badge>
-                  </div>
-                </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{
-                      width:
-                        tournamentGames.length > 0
-                          ? `${Math.round((completedGames / tournamentGames.length) * 100)}%`
-                          : "0%",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium">Matches</p>
-                  <p className="text-xs text-muted-foreground">
-                    Update pairings before reporting a winner.
-                  </p>
-                </div>
-                <Badge variant="secondary">{rounds.length} rounds</Badge>
-                </div>
-
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                {rounds.map((round) => (
-                  <div className="rounded-md border bg-card p-3 shadow-sm" key={round}>
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <h4 className="text-sm font-semibold">
-                        {tournament.format === "round_robin"
-                          ? "All-play-all"
-                          : `Round ${round}`}
-                      </h4>
-                      <Badge variant="outline">
-                        {
-                          tournamentGames.filter(
-                            (game) => game.round_number === round,
-                          ).length
-                        }{" "}
-                        games
-                      </Badge>
-                    </div>
-                    <div className="grid gap-3">
-                      {tournamentGames
-                        .filter((game) => game.round_number === round)
-                        .map((game) => (
-                          <TournamentGameRow
-                            game={game}
-                            key={game.id}
-                            players={players}
-                            profilesById={profilesById}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              </div>
-            </div>
-          );
-        })}
-      </CardContent>
-    </Card>
-  );
-}
-
-function TournamentGameRow({
-  game,
-  players,
-  profilesById,
-}: {
-  game: TournamentGame;
-  players: Profile[];
-  profilesById: Map<string, Profile>;
-}) {
-  const playerOne = game.player_one_id
-    ? profilesById.get(game.player_one_id)
-    : undefined;
-  const playerTwo = game.player_two_id
-    ? profilesById.get(game.player_two_id)
-    : undefined;
-  const winner = game.winner_id ? profilesById.get(game.winner_id) : undefined;
-  const canReport = game.player_one_id && game.player_two_id && game.status !== "completed";
-
-  return (
-    <div className="rounded-md border bg-background/80 p-3 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
-            Game {game.game_number}
-          </p>
-          <div className="mt-2 grid gap-1.5 text-sm">
-            <PlayerLine
-              label="Player 1"
-              player={displayPlayer(playerOne)}
-              won={game.winner_id === game.player_one_id}
-            />
-            <PlayerLine
-              label="Player 2"
-              player={displayPlayer(playerTwo)}
-              won={game.winner_id === game.player_two_id}
-            />
-          </div>
-        </div>
-        <Badge
-          className="gap-1"
-          variant={game.status === "completed" ? "default" : "secondary"}
-        >
-          {game.status === "completed" ? (
-            <CheckCircle2 className="size-3" />
-          ) : (
-            <Clock3 className="size-3" />
-          )}
-          {game.status}
-        </Badge>
-      </div>
-
-      {game.status === "completed" ? (
-        <p className="mt-3 text-sm">
-          Winner: <span className="font-medium">{displayPlayer(winner)}</span>
-        </p>
-      ) : (
-        <div className="mt-4 grid gap-3">
-          <form action={updateTournamentGame} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-            <input type="hidden" name="game_id" value={game.id} />
-            <PlayerGameSelect
-              label="Player 1"
-              name="player_one_id"
-              players={players}
-              value={game.player_one_id}
-            />
-            <PlayerGameSelect
-              label="Player 2"
-              name="player_two_id"
-              players={players}
-              value={game.player_two_id}
-            />
-            <div className="flex items-end">
-              <Button type="submit" size="sm" variant="outline" className="w-full">
-                Save pair
-              </Button>
-            </div>
-          </form>
-
-          {canReport ? (
-            <div className="grid gap-2 sm:grid-cols-2">
-              <WinnerButton
-                gameId={game.id}
-                playerId={game.player_one_id!}
-                playerName={displayPlayer(playerOne)}
-              />
-              <WinnerButton
-                gameId={game.id}
-                playerId={game.player_two_id!}
-                playerName={displayPlayer(playerTwo)}
-              />
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Choose two players before reporting the winner.
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PlayerLine({
-  label,
-  player,
-  won,
-}: {
-  label: string;
-  player: string;
-  won: boolean;
-}) {
-  return (
-    <div className="grid grid-cols-[4.5rem_1fr_auto] items-center gap-2">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="min-w-0 truncate font-medium">{player}</span>
-      {won ? <Badge className="text-[10px]">Winner</Badge> : null}
-    </div>
-  );
-}
-
-function PlayerGameSelect({
-  label,
-  name,
-  players,
-  value,
-}: {
-  label: string;
-  name: string;
-  players: Profile[];
-  value: string | null;
-}) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor={`${name}-${value ?? "empty"}`}>{label}</Label>
-      <select
-        id={`${name}-${value ?? "empty"}`}
-        name={name}
-        className={selectControlClass}
-        defaultValue={value ?? ""}
-        required
-      >
-        <option value="">Choose player</option>
-        {players.map((profile) => (
-          <option key={profile.id} value={profile.id}>
-            {displayPlayer(profile)}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function WinnerButton({
-  gameId,
-  playerId,
-  playerName,
-}: {
-  gameId: string;
-  playerId: string;
-  playerName: string;
-}) {
-  return (
-    <form action={reportTournamentGame}>
-      <input type="hidden" name="game_id" value={gameId} />
-      <input type="hidden" name="winner_id" value={playerId} />
-      <Button type="submit" size="sm" className="w-full">
-        {playerName} won
-      </Button>
-    </form>
   );
 }
 

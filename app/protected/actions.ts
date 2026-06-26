@@ -107,6 +107,7 @@ export async function createTournament(formData: FormData) {
   }
 
   revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
 }
 
 function nextPowerOfTwo(value: number) {
@@ -276,6 +277,8 @@ export async function startTournament(formData: FormData) {
   }
 
   revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
+  revalidatePath(`/protected/tournaments/${tournamentId}`);
 }
 
 export async function updateTournamentGame(formData: FormData) {
@@ -321,6 +324,8 @@ export async function updateTournamentGame(formData: FormData) {
   }
 
   revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
+  revalidatePath(`/protected/tournaments/${game.tournament_id}`);
 }
 
 export async function reportTournamentGame(formData: FormData) {
@@ -437,6 +442,8 @@ export async function reportTournamentGame(formData: FormData) {
   }
 
   revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
+  revalidatePath(`/protected/tournaments/${game.tournament_id}`);
 }
 
 export async function joinTournament(formData: FormData) {
@@ -461,6 +468,8 @@ export async function joinTournament(formData: FormData) {
   }
 
   revalidatePath("/protected");
+  revalidatePath("/protected/tournaments");
+  revalidatePath(`/protected/tournaments/${tournamentId}`);
 }
 
 export async function sendInvite(formData: FormData) {
