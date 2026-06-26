@@ -8,9 +8,9 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Chartwell PinPong",
+  title: "Chartwell Ping Pong",
   description:
-    "Tournament registration, match invites, player profiles, and ratings for Chartwell PinPong.",
+    "Tournament registration, match invites, player profiles, and ratings for Chartwell Ping Pong.",
 };
 
 export default function RootLayout({

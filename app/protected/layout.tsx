@@ -1,6 +1,7 @@
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { PinPongMark } from "@/components/pinpong-mark";
+import { ProtectedNavLinks } from "@/components/protected-nav-links";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
@@ -19,25 +20,9 @@ export default function ProtectedLayout({
             <div className="flex min-w-0 gap-5 items-center font-semibold">
               <Link href={"/"} className="flex min-w-0 items-center gap-2">
                 <PinPongMark animated className="size-8" />
-                <span className="truncate">Chartwell PinPong</span>
+                <span className="truncate">Chartwell Ping Pong</span>
               </Link>
-              <div className="hidden items-center gap-3 text-xs font-medium text-muted-foreground sm:flex">
-                <Link className="hover:text-foreground" href="/protected">
-                  Dashboard
-                </Link>
-                <Link className="hover:text-foreground" href="/protected/profile">
-                  Profile
-                </Link>
-                <Link className="hover:text-foreground" href="/protected/invites">
-                  Invites
-                </Link>
-                <Link className="hover:text-foreground" href="/protected/tournaments">
-                  Tournaments
-                </Link>
-                <Link className="hover:text-foreground" href="/protected/guide">
-                  How it works
-                </Link>
-              </div>
+              <ProtectedNavLinks />
             </div>
             {!hasEnvVars ? (
               <EnvVarWarning />
@@ -53,7 +38,7 @@ export default function ProtectedLayout({
         </div>
 
         <footer className="w-full flex items-center justify-center border-t border-t-primary/15 mx-auto text-center text-xs gap-8 py-6 sm:py-8">
-          <p>Chartwell PinPong</p>
+          <p>Chartwell Ping Pong</p>
           <ThemeSwitcher />
         </footer>
       </div>

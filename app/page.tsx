@@ -126,17 +126,6 @@ export default function Home() {
 async function HomeContent() {
   const data = await loadHomeData();
   const isLoggedIn = Boolean(data.userId);
-  const featuredTournament = data.tournaments[0];
-  const playerCount = featuredTournament
-    ? data.entries.filter((entry) => entry.tournament_id === featuredTournament.id)
-        .length
-    : 0;
-  const topPlayer = data.profiles[0];
-  const topRating = topPlayer?.rating ?? 1000;
-  const openEventCount = data.tournaments.length;
-  const capacityLabel = featuredTournament
-    ? `${playerCount}/${featuredTournament.max_players ?? "?"}`
-    : "0/0";
 
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
@@ -144,7 +133,7 @@ async function HomeContent() {
         <div className="flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 text-sm sm:px-5">
           <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold">
             <PinPongMark animated />
-            <span className="truncate">Chartwell PinPong</span>
+            <span className="truncate">Chartwell Ping Pong</span>
           </Link>
           {!hasEnvVars ? (
             <EnvVarWarning />
@@ -163,7 +152,7 @@ async function HomeContent() {
             Rated table tennis tournaments
           </Badge>
           <h1 className="mt-5 text-4xl font-semibold tracking-normal text-balance sm:text-6xl">
-            Chartwell PinPong
+            Chartwell Ping Pong
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             Create a player profile, join local tournaments, challenge another
@@ -214,67 +203,7 @@ async function HomeContent() {
         </div>
 
         <div className="animate-float-in rounded-md border border-primary/20 bg-card p-3 shadow-xl shadow-primary/10 sm:p-4">
-          <div className="overflow-hidden rounded-md border border-primary/15 bg-background/90">
-            <div className="flex items-center justify-between gap-3 border-b border-primary/10 px-3 py-2 sm:px-4">
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="relative flex size-2.5">
-                  <span className="animate-live-ping absolute inline-flex h-full w-full rounded-full bg-chart-3 opacity-70" />
-                  <span className="relative inline-flex size-2.5 rounded-full bg-chart-3" />
-                </span>
-                <p className="truncate text-sm font-medium">Live match board</p>
-              </div>
-              <Badge className="animate-score-pulse border-chart-4/30 bg-chart-4/25 text-secondary-foreground hover:bg-chart-4/25">
-                {topPlayer ? `${topRating} top rating` : "Rating ready"}
-              </Badge>
-            </div>
-
-            <div className="bg-[linear-gradient(135deg,hsl(var(--accent)),hsl(var(--secondary)),hsl(var(--background)))] p-2 sm:p-4">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-white/45 bg-[linear-gradient(135deg,#04a66f,#10c7a0_48%,#12a7d7)] shadow-inner">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.22),transparent_24%),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,0.11)_1px,transparent_1px)] bg-[length:auto,54px_54px,54px_54px]" />
-                <div className="absolute inset-x-0 top-1/2 h-px bg-white/70" />
-                <div className="absolute inset-y-0 left-1/2 w-px bg-white/70" />
-                <div className="absolute inset-y-8 left-1/2 w-px -translate-x-1/2 border-l border-dashed border-white/55" />
-                <div className="absolute left-[12%] top-[16%] h-[68%] w-[24%] rounded-md border border-white/35" />
-                <div className="absolute bottom-[16%] right-[12%] h-[68%] w-[24%] rounded-md border border-white/35" />
-                <div className="animate-left-paddle absolute left-[18%] top-[24%] h-16 w-1.5 rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.7)] sm:h-24 sm:w-2" />
-                <div className="animate-right-paddle absolute bottom-[20%] right-[17%] h-16 w-1.5 rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.7)] sm:h-24 sm:w-2" />
-                <div className="animate-ball-trail-two absolute left-[56%] top-[39%] size-3 rounded-full bg-chart-4/35 sm:size-4" />
-                <div className="animate-ball-trail-one absolute left-[56%] top-[39%] size-3 rounded-full bg-chart-4/55 sm:size-4" />
-                <div className="animate-court-ball absolute left-[56%] top-[39%] size-4 rounded-full bg-chart-4 shadow-[0_0_30px_hsl(var(--chart-4))] sm:size-5" />
-                <div className="absolute bottom-2 left-2 right-2 grid grid-cols-3 gap-2 sm:bottom-3 sm:left-3 sm:right-3">
-                  <CourtStat label="Events" value={String(openEventCount)} />
-                  <CourtStat label="Seats" value={capacityLabel} />
-                  <CourtStat label="Players" value={String(data.profiles.length)} />
-                </div>
-                <LiveCourtCard
-                  title={featuredTournament?.name ?? "No open tournament yet"}
-                  meta={
-                    featuredTournament
-                      ? `${capacityLabel} players · ${formatDate(featuredTournament.starts_at)}`
-                      : isLoggedIn
-                        ? "Create one from tournaments"
-                        : "Sign in to view live events"
-                  }
-                  className="left-2 top-2 sm:left-4 sm:top-4"
-                />
-                <LiveCourtCard
-                  title={
-                    topPlayer
-                      ? `${displayPlayer(topPlayer)} leads`
-                      : "Leaderboard waiting"
-                  }
-                  meta={
-                    topPlayer
-                      ? `${topRating} rating`
-                      : "Report matches to rank players"
-                  }
-                  className="right-2 top-[42%] sm:right-4 sm:top-[44%]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-[1fr_0.9fr]">
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-[1fr_0.9fr]">
             <div className="rounded-md border border-primary/15 bg-background/85 p-4 shadow-sm">
               <div className="flex items-center gap-2">
                 <Trophy className="size-4 text-primary" />
@@ -361,7 +290,7 @@ async function HomeContent() {
       </section>
 
       <footer className="flex items-center justify-center gap-8 border-t py-8 text-xs">
-        <p>Chartwell PinPong</p>
+        <p>Chartwell Ping Pong</p>
         <ThemeSwitcher />
       </footer>
     </main>
@@ -371,7 +300,7 @@ async function HomeContent() {
 function HomeSkeleton() {
   return (
     <main className="grid min-h-screen place-items-center bg-background px-4 text-sm text-muted-foreground">
-      Loading Chartwell PinPong...
+      Loading Chartwell Ping Pong...
     </main>
   );
 }
@@ -432,34 +361,6 @@ function ScheduleRow({ title, meta }: { title: string; meta: string }) {
     <div className="grid grid-cols-[1fr_auto] items-center gap-3">
       <span className="min-w-0 truncate">{title}</span>
       <span className="text-muted-foreground">{meta}</span>
-    </div>
-  );
-}
-
-function CourtStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-white/25 bg-foreground/15 px-2 py-1 text-center text-white shadow-sm backdrop-blur">
-      <p className="text-[10px] uppercase tracking-normal text-white/70">{label}</p>
-      <p className="truncate text-sm font-semibold leading-5">{value}</p>
-    </div>
-  );
-}
-
-function LiveCourtCard({
-  title,
-  meta,
-  className,
-}: {
-  title: string;
-  meta: string;
-  className: string;
-}) {
-  return (
-    <div
-      className={`absolute max-w-[10rem] rounded-md bg-background/95 p-2 text-xs shadow sm:max-w-56 sm:p-3 sm:text-sm ${className}`}
-    >
-      <p className="truncate font-medium">{title}</p>
-      <p className="truncate text-muted-foreground">{meta}</p>
     </div>
   );
 }

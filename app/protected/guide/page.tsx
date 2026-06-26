@@ -55,7 +55,7 @@ async function GuideContent() {
           How it works
         </Badge>
         <h1 className="mt-4 text-3xl font-semibold tracking-normal">
-          Chartwell PinPong guide
+          Chartwell Ping Pong guide
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
           Use this page as the operating manual for profiles, ratings, invites,
@@ -77,7 +77,7 @@ async function GuideContent() {
         <WorkflowCard
           icon={<ClipboardCheck className="size-5" />}
           title="Report games"
-          text="Report one game at a time. Pick the winner and optionally add the game score, such as 11-7."
+          text="Report casual games one at a time. The opponent confirms before ratings move."
         />
       </section>
 
@@ -179,10 +179,12 @@ rating_delta = max(1, round(32 * (1 - expected)))`}
               What changes after a result
             </CardTitle>
             <CardDescription>
-              Every reported game affects player history and standings.
+              Confirmed casual games and tournament games affect player history
+              and standings.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <GuideStep text="Casual reports wait for opponent confirmation." />
             <GuideStep text="Winner gains rating points based on rating difference." />
             <GuideStep text="Loser loses the same number of rating points." />
             <GuideStep text="Winner gets one win; loser gets one loss." />

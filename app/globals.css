@@ -75,6 +75,18 @@
     animation: pinpong-ball 1.45s ease-in-out infinite alternate;
   }
 
+  .animate-ping-pong-swing {
+    animation: ping-pong-swing 1.4s ease-in-out infinite;
+  }
+
+  .animate-ping-pong-handle {
+    animation: ping-pong-handle 1.4s ease-in-out infinite;
+  }
+
+  .animate-ping-pong-ball {
+    animation: ping-pong-ball 1.4s ease-in-out infinite;
+  }
+
   .animate-court-ball {
     animation: court-ball 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   }
@@ -125,6 +137,45 @@
   }
   to {
     transform: translate3d(4px, -4px, 0);
+  }
+}
+
+@keyframes ping-pong-swing {
+  0%,
+  100% {
+    transform: rotate(-18deg) translate3d(0, 0, 0);
+  }
+  42% {
+    transform: rotate(10deg) translate3d(2px, 1px, 0);
+  }
+  58% {
+    transform: rotate(-6deg) translate3d(1px, 0, 0);
+  }
+}
+
+@keyframes ping-pong-handle {
+  0%,
+  100% {
+    transform: rotate(45deg) translate3d(0, 0, 0);
+  }
+  42% {
+    transform: rotate(58deg) translate3d(1px, -1px, 0);
+  }
+  58% {
+    transform: rotate(49deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ping-pong-ball {
+  0%,
+  100% {
+    transform: translate3d(4px, -3px, 0) scale(0.95);
+  }
+  42% {
+    transform: translate3d(-4px, 4px, 0) scale(1);
+  }
+  58% {
+    transform: translate3d(-1px, 1px, 0) scale(0.98);
   }
 }
 

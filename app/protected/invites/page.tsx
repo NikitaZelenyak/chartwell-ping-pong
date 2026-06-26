@@ -20,9 +20,9 @@ import {
 } from "@/lib/datetime";
 import { createClient } from "@/lib/supabase/server";
 import {
-  reportMatch,
   respondToInvite,
   sendInvite,
+  submitCasualMatchReport,
   updateInvite,
 } from "../actions";
 
@@ -410,7 +410,7 @@ function InviteResultForm({
 
   return (
     <form
-      action={reportMatch}
+      action={submitCasualMatchReport}
       className="mt-4 grid gap-3 rounded-md border border-primary/15 bg-primary/5 p-3"
     >
       <input type="hidden" name="invite_id" value={inviteId} />
@@ -438,7 +438,7 @@ function InviteResultForm({
         </Button>
       </div>
       <p className="text-xs leading-5 text-muted-foreground">
-        Ratings update immediately and the invite becomes completed.
+        Ratings update after the other player confirms the result.
       </p>
     </form>
   );

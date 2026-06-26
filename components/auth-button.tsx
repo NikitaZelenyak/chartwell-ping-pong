@@ -10,10 +10,23 @@ export async function AuthButton() {
   const { data } = await supabase.auth.getClaims();
 
   const user = data?.claims;
+  const userId = typeof user?.sub === "string" ? user.sub : null;
+  const fallbackName = typeof user?.email === "string" ? user.email : "Player";
+  let displayName = fallbackName;
+
+  if (userId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", userId)
+      .maybeSingle();
+
+    displayName = profile?.display_name?.trim() || fallbackName;
+  }
 
   return user ? (
     <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-      <span className="hidden max-w-52 truncate sm:inline">Hey, {user.email}!</span>
+      <span className="hidden max-w-52 truncate sm:inline">{displayName}</span>
       <LogoutButton />
     </div>
   ) : (

@@ -1,6 +1,14 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { CalendarDays, MapPin, ShieldAlert, Swords, Trophy } from "lucide-react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  MapPin,
+  ShieldAlert,
+  Swords,
+  Trophy,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -506,6 +514,9 @@ function TournamentManager({
           const tournamentGames = games.filter(
             (game) => game.tournament_id === tournament.id,
           );
+          const completedGames = tournamentGames.filter(
+            (game) => game.status === "completed",
+          ).length;
           const players = entries
             .filter((entry) => entry.tournament_id === tournament.id)
             .map((entry) => profilesById.get(entry.user_id))
@@ -515,25 +526,64 @@ function TournamentManager({
           ).sort((first, second) => first - second);
 
           return (
-            <div className="rounded-md border p-4" key={tournament.id}>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold">{tournament.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {formatTournamentFormat(tournament.format)} · {tournament.status}
-                  </p>
+            <div className="overflow-hidden rounded-md border bg-background" key={tournament.id}>
+              <div className="border-b bg-muted/35 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">{tournament.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {formatTournamentFormat(tournament.format)} · {tournament.status}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">{players.length} players</Badge>
+                    <Badge variant="outline">
+                      {completedGames}/{tournamentGames.length} complete
+                    </Badge>
+                  </div>
                 </div>
-                <Badge variant="secondary">{tournamentGames.length} games</Badge>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{
+                      width:
+                        tournamentGames.length > 0
+                          ? `${Math.round((completedGames / tournamentGames.length) * 100)}%`
+                          : "0%",
+                    }}
+                  />
+                </div>
               </div>
 
-              <div className="mt-4 space-y-5">
+              <div className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium">Matches</p>
+                  <p className="text-xs text-muted-foreground">
+                    Update pairings before reporting a winner.
+                  </p>
+                </div>
+                <Badge variant="secondary">{rounds.length} rounds</Badge>
+                </div>
+
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 {rounds.map((round) => (
-                  <div className="space-y-3" key={round}>
-                    <h4 className="text-sm font-semibold text-muted-foreground">
-                      {tournament.format === "round_robin"
-                        ? "All-play-all games"
-                        : `Round ${round}`}
-                    </h4>
+                  <div className="rounded-md border bg-card p-3 shadow-sm" key={round}>
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <h4 className="text-sm font-semibold">
+                        {tournament.format === "round_robin"
+                          ? "All-play-all"
+                          : `Round ${round}`}
+                      </h4>
+                      <Badge variant="outline">
+                        {
+                          tournamentGames.filter(
+                            (game) => game.round_number === round,
+                          ).length
+                        }{" "}
+                        games
+                      </Badge>
+                    </div>
                     <div className="grid gap-3">
                       {tournamentGames
                         .filter((game) => game.round_number === round)
@@ -548,6 +598,7 @@ function TournamentManager({
                     </div>
                   </div>
                 ))}
+              </div>
               </div>
             </div>
           );
@@ -576,15 +627,34 @@ function TournamentGameRow({
   const canReport = game.player_one_id && game.player_two_id && game.status !== "completed";
 
   return (
-    <div className="rounded-md border bg-background/80 p-3">
+    <div className="rounded-md border bg-background/80 p-3 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-medium">Game {game.game_number}</p>
-          <p className="text-sm text-muted-foreground">
-            {displayPlayer(playerOne)} vs {displayPlayer(playerTwo)}
+          <p className="text-xs font-medium uppercase tracking-normal text-muted-foreground">
+            Game {game.game_number}
           </p>
+          <div className="mt-2 grid gap-1.5 text-sm">
+            <PlayerLine
+              label="Player 1"
+              player={displayPlayer(playerOne)}
+              won={game.winner_id === game.player_one_id}
+            />
+            <PlayerLine
+              label="Player 2"
+              player={displayPlayer(playerTwo)}
+              won={game.winner_id === game.player_two_id}
+            />
+          </div>
         </div>
-        <Badge variant={game.status === "completed" ? "default" : "secondary"}>
+        <Badge
+          className="gap-1"
+          variant={game.status === "completed" ? "default" : "secondary"}
+        >
+          {game.status === "completed" ? (
+            <CheckCircle2 className="size-3" />
+          ) : (
+            <Clock3 className="size-3" />
+          )}
           {game.status}
         </Badge>
       </div>
@@ -636,6 +706,24 @@ function TournamentGameRow({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function PlayerLine({
+  label,
+  player,
+  won,
+}: {
+  label: string;
+  player: string;
+  won: boolean;
+}) {
+  return (
+    <div className="grid grid-cols-[4.5rem_1fr_auto] items-center gap-2">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="min-w-0 truncate font-medium">{player}</span>
+      {won ? <Badge className="text-[10px]">Winner</Badge> : null}
     </div>
   );
 }

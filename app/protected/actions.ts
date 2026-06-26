@@ -545,12 +545,11 @@ export async function respondToInvite(formData: FormData) {
   revalidatePath("/protected");
 }
 
-export async function reportMatch(formData: FormData) {
+export async function submitCasualMatchReport(formData: FormData) {
   const { supabase, user } = await getCurrentUser();
   const opponentId = cleanString(formData.get("opponent_id"));
   const result = cleanString(formData.get("result"));
   const inviteId = cleanString(formData.get("invite_id"));
-  const tournamentId = cleanString(formData.get("tournament_id"));
 
   if (!opponentId || opponentId === user.id) {
     throw new Error("Choose a valid opponent.");
@@ -586,16 +585,65 @@ export async function reportMatch(formData: FormData) {
   const playerOneScore = result === "win" ? 1 : 0;
   const playerTwoScore = result === "win" ? 0 : 1;
 
-  const { error } = await supabase.rpc("report_match", {
-    p_player_one: user.id,
-    p_player_two: opponentId,
-    p_winner: winnerId,
-    p_player_one_score: playerOneScore,
-    p_player_two_score: playerTwoScore,
-    p_score_summary: cleanString(formData.get("score_summary")),
-    p_tournament_id: tournamentId,
-    p_invite_id: inviteId,
+  const { error } = await supabase.from("match_reports").insert({
+    reporter_id: user.id,
+    opponent_id: opponentId,
+    invite_id: inviteId,
+    player_one_id: user.id,
+    player_two_id: opponentId,
+    winner_id: winnerId,
+    player_one_score: playerOneScore,
+    player_two_score: playerTwoScore,
+    score_summary: cleanString(formData.get("score_summary")),
+    status: "pending",
   });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/invites");
+  revalidatePath("/protected");
+}
+
+export async function confirmMatchReport(formData: FormData) {
+  const { supabase } = await getCurrentUser();
+  const reportId = cleanString(formData.get("report_id"));
+
+  if (!reportId) {
+    throw new Error("Match report is required.");
+  }
+
+  const { error } = await supabase.rpc("confirm_match_report", {
+    p_report_id: reportId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/invites");
+  revalidatePath("/protected");
+}
+
+export async function declineMatchReport(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const reportId = cleanString(formData.get("report_id"));
+
+  if (!reportId) {
+    throw new Error("Match report is required.");
+  }
+
+  const { error } = await supabase
+    .from("match_reports")
+    .update({
+      status: "declined",
+      responded_by: user.id,
+      responded_at: new Date().toISOString(),
+    })
+    .eq("id", reportId)
+    .eq("opponent_id", user.id)
+    .eq("status", "pending");
 
   if (error) {
     throw new Error(error.message);

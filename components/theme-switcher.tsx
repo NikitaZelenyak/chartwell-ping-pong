@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { PinPongMark } from "@/components/pinpong-mark";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +31,13 @@ const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size={"sm"}>
+        <Button
+          aria-label="Switch theme"
+          className="gap-2 border-primary/20 bg-background/80 shadow-sm hover:bg-primary/10"
+          variant="outline"
+          size="sm"
+        >
+          <PinPongMark className="size-6 rounded-sm" />
           {theme === "light" ? (
             <Sun
               key="light"

@@ -44,7 +44,7 @@ export function avatarUrl(style: string | null | undefined, seed: string | null 
   }
 
   const safeStyle = style && allowedStyles.has(style) ? style : "lorelei";
-  const safeSeed = seed?.trim() || "chartwell-pinpong";
+  const safeSeed = seed?.trim() || "chartwell-ping-pong";
 
   return `https://api.dicebear.com/10.x/${safeStyle}/svg?seed=${encodeURIComponent(safeSeed)}`;
 }
@@ -81,7 +81,7 @@ export function initialsForName(name: string | null | undefined) {
 }
 
 export function initialsAvatarColors(seed: string | null | undefined) {
-  const text = seed?.trim() || "chartwell-pinpong";
+  const text = seed?.trim() || "chartwell-ping-pong";
   let hash = 0;
 
   for (let index = 0; index < text.length; index += 1) {

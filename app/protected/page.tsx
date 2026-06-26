@@ -29,7 +29,11 @@ import {
 } from "@/lib/avatars";
 import { APP_TIME_ZONE } from "@/lib/datetime";
 import { createClient } from "@/lib/supabase/server";
-import { reportMatch } from "./actions";
+import {
+  confirmMatchReport,
+  declineMatchReport,
+  submitCasualMatchReport,
+} from "./actions";
 
 type Profile = {
   id: string;
@@ -90,12 +94,25 @@ type Match = {
   created_at: string | null;
 };
 
+type MatchReport = {
+  id: string;
+  reporter_id: string;
+  opponent_id: string;
+  winner_id: string;
+  player_one_id: string;
+  player_two_id: string;
+  score_summary: string | null;
+  status: string | null;
+  created_at: string | null;
+};
+
 type DashboardData = {
   profiles: Profile[];
   tournaments: Tournament[];
   entries: TournamentEntry[];
   invites: MatchInvite[];
   matches: Match[];
+  reports: MatchReport[];
   setupError: string | null;
 };
 
@@ -152,6 +169,7 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
     entriesResult,
     invitesResult,
     matchesResult,
+    reportsResult,
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -182,6 +200,14 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
       )
       .order("created_at", { ascending: false })
       .limit(8),
+    supabase
+      .from("match_reports")
+      .select(
+        "id,reporter_id,opponent_id,winner_id,player_one_id,player_two_id,score_summary,status,created_at",
+      )
+      .or(`reporter_id.eq.${userId},opponent_id.eq.${userId}`)
+      .order("created_at", { ascending: false })
+      .limit(8),
   ]);
 
   for (const result of [
@@ -190,6 +216,7 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
     entriesResult,
     invitesResult,
     matchesResult,
+    reportsResult,
   ]) {
     if (result.error) {
       setupErrors.push(result.error.message);
@@ -202,6 +229,7 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
     entries: (entriesResult.data ?? []) as TournamentEntry[],
     invites: (invitesResult.data ?? []) as MatchInvite[],
     matches: (matchesResult.data ?? []) as Match[],
+    reports: (reportsResult.data ?? []) as MatchReport[],
     setupError: setupErrors[0] ?? null,
   };
 }
@@ -229,20 +257,10 @@ async function Dashboard() {
   const profilesById = new Map(data.profiles.map((profile) => [profile.id, profile]));
   const myProfile = profilesById.get(user.id);
   const rivals = data.profiles.filter((profile) => profile.id !== user.id);
-  const myEntries = new Set(
-    data.entries
-      .filter((entry) => entry.user_id === user.id)
-      .map((entry) => entry.tournament_id),
-  );
-  const joinedTournaments = data.tournaments.filter((tournament) =>
-    myEntries.has(tournament.id),
-  );
-  const acceptedInvites = data.invites.filter(
-    (invite) => invite.status === "accepted",
-  );
   const openInvites = data.invites.filter(
     (invite) => invite.status === "pending",
   );
+  const pendingReports = data.reports.filter((report) => report.status === "pending");
 
   return (
     <div className="w-full space-y-6 sm:space-y-10">
@@ -403,11 +421,11 @@ async function Dashboard() {
               Report match
             </CardTitle>
             <CardDescription>
-              Rated results update both players with an Elo-style calculation.
+              Casual matches need opponent confirmation before ratings change.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={reportMatch} className="grid gap-4">
+            <form action={submitCasualMatchReport} className="grid gap-4">
               <PlayerSelect label="Opponent" name="opponent_id" profiles={rivals} />
               <div className="grid gap-2">
                 <Label htmlFor="result">Winner</Label>
@@ -421,48 +439,30 @@ async function Dashboard() {
                   <option value="loss">Opponent won</option>
                 </select>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="tournament_id">Tournament</Label>
-                <select
-                  id="tournament_id"
-                  name="tournament_id"
-                  className={selectControlClass}
-                >
-                  <option value="">Casual rated match</option>
-                  {joinedTournaments.map((tournament) => (
-                    <option key={tournament.id} value={tournament.id}>
-                      {tournament.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="invite_id">Linked invite</Label>
-                <select
-                  id="invite_id"
-                  name="invite_id"
-                  className={selectControlClass}
-                >
-                  <option value="">No invite</option>
-                  {acceptedInvites.map((invite) => {
-                    const otherPlayer = profilesById.get(
-                      invite.created_by === user.id ? invite.opponent_id : invite.created_by,
-                    );
-
-                    return (
-                      <option key={invite.id} value={invite.id}>
-                        {displayPlayer(otherPlayer)} - {formatDate(invite.scheduled_for)}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
               <Field label="Game score" name="score_summary" placeholder="11-7" />
               <Button type="submit" disabled={rivals.length === 0} className="w-full sm:w-auto">
                 <Check className="size-4" />
-                Report result
+                Send for confirmation
               </Button>
             </form>
+            <div className="mt-6 border-t pt-5">
+              <p className="font-medium">Pending confirmations</p>
+              <div className="mt-3 space-y-3">
+                {pendingReports.map((report) => (
+                  <MatchReportCard
+                    key={report.id}
+                    profilesById={profilesById}
+                    report={report}
+                    userId={user.id}
+                  />
+                ))}
+                {pendingReports.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No casual match confirmations waiting.
+                  </p>
+                ) : null}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -517,7 +517,7 @@ async function Dashboard() {
 function DashboardFallback() {
   return (
     <div className="grid min-h-[24rem] place-items-center rounded-md border border-dashed px-4 text-center text-sm text-muted-foreground sm:min-h-[40rem]">
-      Loading Chartwell PinPong dashboard...
+      Loading Chartwell Ping Pong dashboard...
     </div>
   );
 }
@@ -592,6 +592,56 @@ function EmptyState({ text }: { text: string }) {
   return (
     <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
       {text}
+    </div>
+  );
+}
+
+function MatchReportCard({
+  report,
+  profilesById,
+  userId,
+}: {
+  report: MatchReport;
+  profilesById: Map<string, Profile>;
+  userId: string;
+}) {
+  const reporter = profilesById.get(report.reporter_id);
+  const opponent = profilesById.get(report.opponent_id);
+  const winner = profilesById.get(report.winner_id);
+  const canRespond = report.opponent_id === userId;
+
+  return (
+    <div className="rounded-md border bg-background/80 p-3 text-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-medium">
+            {displayPlayer(reporter)} vs {displayPlayer(opponent)}
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            Winner reported: {displayPlayer(winner)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {report.score_summary || "Score not added"} · {formatDate(report.created_at)}
+          </p>
+        </div>
+        <Badge variant="secondary">{canRespond ? "Needs you" : "Waiting"}</Badge>
+      </div>
+      {canRespond ? (
+        <div className="mt-3 grid gap-2 sm:flex">
+          <form action={confirmMatchReport}>
+            <input type="hidden" name="report_id" value={report.id} />
+            <Button type="submit" size="sm" className="w-full sm:w-auto">
+              Confirm
+            </Button>
+          </form>
+          <form action={declineMatchReport}>
+            <input type="hidden" name="report_id" value={report.id} />
+            <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+              Decline
+            </Button>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
