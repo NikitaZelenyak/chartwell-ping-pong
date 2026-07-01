@@ -1,6 +1,14 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Check, UserRound } from "lucide-react";
+import {
+  Check,
+  Crown,
+  LockKeyhole,
+  Medal,
+  Sparkles,
+  Trophy,
+  UserRound,
+} from "lucide-react";
 
 import { AchievementsPanel } from "@/components/achievements-panel";
 import { Badge } from "@/components/ui/badge";
@@ -17,14 +25,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  achievementRewardTier,
   avatarUrl,
   initialsAvatarColors,
   initialsForName,
+  isAvatarUnlocked,
   isInitialsAvatar,
   playerAvatarOptions,
+  type AchievementRewardTier,
   type AvatarOption,
 } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { saveProfile, syncMyAchievements } from "../actions";
 
 type Profile = {
@@ -132,6 +144,7 @@ async function ProfileContent() {
     loadAchievements(user.id),
   ]);
   const playerName = displayPlayer(profile, user.email ?? "Player");
+  const achievementCount = achievements.length;
 
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6">
@@ -143,12 +156,18 @@ async function ProfileContent() {
               seed={profile?.avatar_seed ?? user.id}
               label={playerName}
               className="size-16"
+              achievementCount={achievementCount}
             />
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">Player profile</p>
               <h1 className="mt-2 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
                 {playerName}
               </h1>
+              {profile?.bio ? (
+                <p className="mt-2 max-w-2xl break-words text-sm leading-6 text-muted-foreground">
+                  {profile.bio}
+                </p>
+              ) : null}
             </div>
           </div>
           <Badge variant="secondary">{ratingBand(profile?.rating ?? null)}</Badge>
@@ -201,6 +220,7 @@ async function ProfileContent() {
               selectedSeed={profile?.avatar_seed}
               initialsName={profile?.display_name ?? user.email ?? "Player"}
               initialsSeed={profile?.avatar_seed ?? user.id}
+              achievementCount={achievementCount}
               className="md:col-span-2"
             />
             <div className="grid gap-2 md:col-span-2">
@@ -276,42 +296,59 @@ function Field({
 }
 
 function AvatarThumb({
+  achievementCount = 0,
   styleName,
   seed,
   label,
   className,
 }: {
+  achievementCount?: number;
   styleName: string | null | undefined;
   seed: string | null | undefined;
   label: string;
   className?: string;
 }) {
+  const tier = achievementRewardTier(achievementCount);
+  const frameClass = avatarFrameClass(tier);
+
   if (isInitialsAvatar(styleName)) {
     const colors = initialsAvatarColors(seed ?? label);
 
     return (
-      <div
-        aria-label={`${label} initials avatar`}
-        className={`grid shrink-0 place-items-center rounded-md border font-semibold text-white shadow-sm ${className ?? "size-12"}`}
-        role="img"
-        style={colors}
-      >
-        <span className="text-[clamp(0.75rem,32%,1.8rem)]">
-          {initialsForName(label)}
-        </span>
+      <div className={cn("relative shrink-0", className ?? "size-12")}>
+        <div
+          aria-label={`${label} initials avatar`}
+          className={cn(
+            "grid size-full place-items-center rounded-md border font-semibold text-white shadow-sm",
+            frameClass,
+          )}
+          role="img"
+          style={colors}
+        >
+          <span className="text-[clamp(0.75rem,32%,1.8rem)]">
+            {initialsForName(label)}
+          </span>
+        </div>
+        <AvatarTierBadge tier={tier} />
       </div>
     );
   }
 
   return (
-    <div
-      aria-label={`${label} avatar`}
-      className={`shrink-0 rounded-md border bg-accent bg-cover bg-center shadow-sm ${className ?? "size-12"}`}
-      role="img"
-      style={{
-        backgroundImage: `url("${avatarUrl(styleName, seed)}")`,
-      }}
-    />
+    <div className={cn("relative shrink-0", className ?? "size-12")}>
+      <div
+        aria-label={`${label} avatar`}
+        className={cn(
+          "size-full rounded-md border bg-accent bg-cover bg-center shadow-sm",
+          frameClass,
+        )}
+        role="img"
+        style={{
+          backgroundImage: `url("${avatarUrl(styleName, seed)}")`,
+        }}
+      />
+      <AvatarTierBadge tier={tier} />
+    </div>
   );
 }
 
@@ -322,6 +359,7 @@ function AvatarPicker({
   selectedSeed,
   initialsName = "Chartwell Player",
   initialsSeed = "chartwell-player",
+  achievementCount,
   className,
 }: {
   label: string;
@@ -330,6 +368,7 @@ function AvatarPicker({
   selectedSeed?: string | null;
   initialsName?: string;
   initialsSeed?: string;
+  achievementCount: number;
   className?: string;
 }) {
   const selectedIndex = Math.max(
@@ -343,7 +382,10 @@ function AvatarPicker({
 
   return (
     <div className={`grid gap-2 ${className ?? ""}`}>
-      <Label>{label}</Label>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Label>{label}</Label>
+        <Badge variant="secondary">{achievementCount} achievements</Badge>
+      </div>
       <div className="grid max-h-[28rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-6">
         {options.map((option, index) => {
           const optionSeed = isInitialsAvatar(option.style)
@@ -352,32 +394,162 @@ function AvatarPicker({
           const optionLabel = isInitialsAvatar(option.style)
             ? initialsName
             : option.label;
+          const unlocked = isAvatarUnlocked(option, achievementCount);
+          const RewardIcon = tierIcon(option.rewardTier);
 
           return (
             <label
-              className="group cursor-pointer rounded-md border bg-background p-2 shadow-sm transition hover:border-primary/60 has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:ring-1 has-[:checked]:ring-primary"
+              className={cn(
+                "group rounded-md border bg-background p-2 shadow-sm transition has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:ring-1 has-[:checked]:ring-primary",
+                unlocked
+                  ? "cursor-pointer hover:border-primary/60"
+                  : "cursor-not-allowed opacity-60",
+              )}
               key={`${option.style}-${option.seed}`}
             >
               <input
                 className="sr-only"
                 defaultChecked={index === selectedIndex}
+                disabled={!unlocked}
                 name="avatar_choice"
                 type="radio"
                 value={`${option.style}|${optionSeed}`}
               />
-              <AvatarThumb
-                styleName={option.style}
-                seed={optionSeed}
-                label={optionLabel}
-                className="aspect-square w-full"
-              />
+              <div className="relative">
+                <AvatarThumb
+                  styleName={option.style}
+                  seed={optionSeed}
+                  label={optionLabel}
+                  className="aspect-square w-full"
+                />
+                {!unlocked ? (
+                  <div className="absolute inset-0 grid place-items-center rounded-md bg-background/75 text-muted-foreground backdrop-blur-[1px]">
+                    <LockKeyhole className="size-5" />
+                  </div>
+                ) : null}
+              </div>
               <span className="mt-2 block truncate text-center text-xs font-medium">
                 {option.label}
               </span>
+              {option.minAchievements ? (
+                <span
+                  className={cn(
+                    "mt-1 flex items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-center text-[0.65rem] font-medium",
+                    unlocked
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  <RewardIcon className="size-3" />
+                  {unlocked
+                    ? `${tierName(option.rewardTier)} ${providerLabel(option.provider)}`
+                    : `Unlock at ${option.minAchievements}`}
+                </span>
+              ) : null}
             </label>
           );
         })}
       </div>
     </div>
   );
+}
+
+function avatarFrameClass(tier: AchievementRewardTier | null) {
+  if (tier === "champion") {
+    return "ring-4 ring-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.45)]";
+  }
+
+  if (tier === "gold") {
+    return "ring-4 ring-yellow-300 shadow-[0_0_18px_rgba(234,179,8,0.35)]";
+  }
+
+  if (tier === "silver") {
+    return "ring-4 ring-slate-300 shadow-[0_0_16px_rgba(148,163,184,0.3)]";
+  }
+
+  if (tier === "bronze") {
+    return "ring-4 ring-orange-300 shadow-[0_0_14px_rgba(251,146,60,0.28)]";
+  }
+
+  return "";
+}
+
+function avatarBadgeClass(tier: AchievementRewardTier) {
+  if (tier === "champion") {
+    return "border-amber-300 bg-amber-400 text-amber-950";
+  }
+
+  if (tier === "gold") {
+    return "border-yellow-300 bg-yellow-300 text-yellow-950";
+  }
+
+  if (tier === "silver") {
+    return "border-slate-200 bg-slate-200 text-slate-900";
+  }
+
+  return "border-orange-300 bg-orange-300 text-orange-950";
+}
+
+function tierName(tier: AchievementRewardTier | undefined) {
+  if (tier === "champion") {
+    return "Champion";
+  }
+
+  if (tier === "gold") {
+    return "Gold";
+  }
+
+  if (tier === "silver") {
+    return "Silver";
+  }
+
+  if (tier === "bronze") {
+    return "Bronze";
+  }
+
+  return "Reward";
+}
+
+function AvatarTierBadge({ tier }: { tier: AchievementRewardTier | null }) {
+  if (!tier) {
+    return null;
+  }
+
+  const Icon = tierIcon(tier);
+
+  return (
+    <span
+      className={cn(
+        "absolute -right-1 -top-1 grid size-7 place-items-center rounded-full border shadow-sm",
+        avatarBadgeClass(tier),
+      )}
+      title={`${tierName(tier)} achievement tier`}
+    >
+      <Icon className="size-4" />
+    </span>
+  );
+}
+
+function tierIcon(tier: AchievementRewardTier | undefined) {
+  if (tier === "champion") {
+    return Crown;
+  }
+
+  if (tier === "gold") {
+    return Trophy;
+  }
+
+  if (tier === "silver") {
+    return Sparkles;
+  }
+
+  return Medal;
+}
+
+function providerLabel(provider: AvatarOption["provider"]) {
+  if (provider === "robohash") {
+    return "Robohash";
+  }
+
+  return "reward";
 }

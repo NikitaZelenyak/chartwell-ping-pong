@@ -5,6 +5,7 @@ import {
   Crown,
   Flame,
   Gem,
+  Gift,
   Handshake,
   HeartHandshake,
   Medal,
@@ -21,6 +22,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { ACHIEVEMENTS } from "@/lib/achievements";
+import { nextAvatarUnlockTarget } from "@/lib/avatars";
 import { cn } from "@/lib/utils";
 
 type EarnedAchievement = {
@@ -74,6 +76,7 @@ export function AchievementsPanel({
     ]),
   );
   const earnedCount = achievements.length;
+  const nextUnlock = nextAvatarUnlockTarget(earnedCount);
 
   return (
     <div className="space-y-5 px-1 pb-1 sm:px-2 sm:pb-2">
@@ -87,6 +90,37 @@ export function AchievementsPanel({
         <Badge variant="secondary">
           {earnedCount}/{ACHIEVEMENTS.length} earned
         </Badge>
+      </div>
+      <div className="rounded-md border bg-background/80 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="flex items-center gap-2 text-sm font-medium">
+            <Gift className="size-4 text-primary" />
+            Reward avatar progress
+          </p>
+          <Badge variant="outline">
+            {nextUnlock
+              ? `${nextUnlock - earnedCount} to next unlock`
+              : "All reward avatars unlocked"}
+          </Badge>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-all"
+            style={{
+              width: `${Math.min(
+                100,
+                Math.round((earnedCount / ACHIEVEMENTS.length) * 100),
+              )}%`,
+            }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {nextUnlock
+            ? `${nextUnlock - earnedCount} more achievement${
+                nextUnlock - earnedCount === 1 ? "" : "s"
+              } until the next reward avatar tier unlocks.`
+            : "Every achievement avatar tier is available on your profile."}
+        </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {ACHIEVEMENTS.map((achievement) => {

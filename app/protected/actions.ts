@@ -4,7 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { AchievementKey } from "@/lib/achievements";
-import { safeAvatarSeed, safeAvatarStyle } from "@/lib/avatars";
+import {
+  findPlayerAvatarOption,
+  isAvatarUnlocked,
+  safeAvatarSeed,
+  safeAvatarStyle,
+} from "@/lib/avatars";
 import { dateTimeLocalToIso } from "@/lib/datetime";
 
 async function getCurrentUser() {
@@ -224,6 +229,31 @@ function cleanAvatarChoice(
   };
 }
 
+function cleanPlayerAvatarChoice(
+  value: FormDataEntryValue | null,
+  achievementCount: number,
+  fallbackSeed: string,
+) {
+  const [style, rawSeed] = String(value ?? "").split("|");
+  const seed = safeAvatarSeed(rawSeed, fallbackSeed);
+  const option = findPlayerAvatarOption(style, seed);
+
+  if (!option) {
+    throw new Error("Choose a valid profile avatar.");
+  }
+
+  if (!isAvatarUnlocked(option, achievementCount)) {
+    throw new Error(
+      `This avatar unlocks at ${option.minAchievements ?? 0} achievements.`,
+    );
+  }
+
+  return {
+    avatar_style: option.style,
+    avatar_seed: seed,
+  };
+}
+
 export async function syncMyAchievements() {
   const { supabase, user } = await getCurrentUser();
 
@@ -239,9 +269,18 @@ export async function syncMyAchievements() {
 
 export async function saveProfile(formData: FormData) {
   const { supabase, user } = await getCurrentUser();
-  const avatar = cleanAvatarChoice(
+  const { count: achievementCount, error: achievementError } = await supabase
+    .from("profile_achievements")
+    .select("achievement_key", { count: "exact", head: true })
+    .eq("profile_id", user.id);
+
+  if (achievementError) {
+    throw new Error(achievementError.message);
+  }
+
+  const avatar = cleanPlayerAvatarChoice(
     formData.get("avatar_choice"),
-    "lorelei",
+    achievementCount ?? 0,
     user.id,
   );
 

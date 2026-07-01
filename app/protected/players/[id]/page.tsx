@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, Swords, Trophy } from "lucide-react";
+import { ArrowLeft, Crown, Medal, Sparkles, Swords, Trophy } from "lucide-react";
 
 import { AchievementsPanel } from "@/components/achievements-panel";
 import { Badge } from "@/components/ui/badge";
@@ -15,12 +15,15 @@ import {
 } from "@/components/ui/card";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
+  achievementRewardTier,
   avatarUrl,
   initialsAvatarColors,
   initialsForName,
   isInitialsAvatar,
+  type AchievementRewardTier,
 } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 
 type Profile = {
   id: string;
@@ -150,6 +153,7 @@ async function PlayerProfileContent({
 
   const playerName = displayPlayer(data.profile);
   const profilesById = new Map(data.allProfiles.map((profile) => [profile.id, profile]));
+  const achievementCount = data.achievements.length;
 
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6">
@@ -168,6 +172,7 @@ async function PlayerProfileContent({
               seed={data.profile.avatar_seed ?? data.profile.id}
               label={playerName}
               className="size-20"
+              achievementCount={achievementCount}
             />
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">Player card</p>
@@ -271,41 +276,146 @@ function ProfileStat({ label, value }: { label: string; value: number }) {
 }
 
 function AvatarThumb({
+  achievementCount = 0,
   styleName,
   seed,
   label,
   className,
 }: {
+  achievementCount?: number;
   styleName: string | null | undefined;
   seed: string | null | undefined;
   label: string;
   className?: string;
 }) {
+  const tier = achievementRewardTier(achievementCount);
+  const frameClass = avatarFrameClass(tier);
+
   if (isInitialsAvatar(styleName)) {
     const colors = initialsAvatarColors(seed ?? label);
 
     return (
-      <div
-        aria-label={`${label} initials avatar`}
-        className={`grid shrink-0 place-items-center rounded-md border font-semibold text-white shadow-sm ${className ?? "size-12"}`}
-        role="img"
-        style={colors}
-      >
-        <span className="text-[clamp(0.75rem,32%,1.8rem)]">
-          {initialsForName(label)}
-        </span>
+      <div className={cn("relative shrink-0", className ?? "size-12")}>
+        <div
+          aria-label={`${label} initials avatar`}
+          className={cn(
+            "grid size-full place-items-center rounded-md border font-semibold text-white shadow-sm",
+            frameClass,
+          )}
+          role="img"
+          style={colors}
+        >
+          <span className="text-[clamp(0.75rem,32%,1.8rem)]">
+            {initialsForName(label)}
+          </span>
+        </div>
+        <AvatarTierBadge tier={tier} />
       </div>
     );
   }
 
   return (
-    <div
-      aria-label={`${label} avatar`}
-      className={`shrink-0 rounded-md border bg-accent bg-cover bg-center shadow-sm ${className ?? "size-12"}`}
-      role="img"
-      style={{
-        backgroundImage: `url("${avatarUrl(styleName, seed)}")`,
-      }}
-    />
+    <div className={cn("relative shrink-0", className ?? "size-12")}>
+      <div
+        aria-label={`${label} avatar`}
+        className={cn(
+          "size-full rounded-md border bg-accent bg-cover bg-center shadow-sm",
+          frameClass,
+        )}
+        role="img"
+        style={{
+          backgroundImage: `url("${avatarUrl(styleName, seed)}")`,
+        }}
+      />
+      <AvatarTierBadge tier={tier} />
+    </div>
   );
+}
+
+function avatarFrameClass(tier: AchievementRewardTier | null) {
+  if (tier === "champion") {
+    return "ring-4 ring-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.45)]";
+  }
+
+  if (tier === "gold") {
+    return "ring-4 ring-yellow-300 shadow-[0_0_18px_rgba(234,179,8,0.35)]";
+  }
+
+  if (tier === "silver") {
+    return "ring-4 ring-slate-300 shadow-[0_0_16px_rgba(148,163,184,0.3)]";
+  }
+
+  if (tier === "bronze") {
+    return "ring-4 ring-orange-300 shadow-[0_0_14px_rgba(251,146,60,0.28)]";
+  }
+
+  return "";
+}
+
+function avatarBadgeClass(tier: AchievementRewardTier) {
+  if (tier === "champion") {
+    return "border-amber-300 bg-amber-400 text-amber-950";
+  }
+
+  if (tier === "gold") {
+    return "border-yellow-300 bg-yellow-300 text-yellow-950";
+  }
+
+  if (tier === "silver") {
+    return "border-slate-200 bg-slate-200 text-slate-900";
+  }
+
+  return "border-orange-300 bg-orange-300 text-orange-950";
+}
+
+function tierName(tier: AchievementRewardTier) {
+  if (tier === "champion") {
+    return "Champion";
+  }
+
+  if (tier === "gold") {
+    return "Gold";
+  }
+
+  if (tier === "silver") {
+    return "Silver";
+  }
+
+  return "Bronze";
+}
+
+function AvatarTierBadge({ tier }: { tier: AchievementRewardTier | null }) {
+  if (!tier) {
+    return null;
+  }
+
+  const Icon = tierIcon(tier);
+
+  return (
+    <span
+      className={cn(
+        "absolute -right-1 -top-1 grid size-7 place-items-center rounded-full border shadow-sm",
+        avatarBadgeClass(tier),
+      )}
+      title={`${tierName(tier)} achievement tier`}
+    >
+      <Icon className="size-4" />
+    </span>
+  );
+}
+
+function tierIcon(tier: AchievementRewardTier) {
+  if (tier === "champion") {
+    return Crown;
+  }
+
+  if (tier === "gold") {
+    return Trophy;
+  }
+
+  if (tier === "silver") {
+    return Sparkles;
+  }
+
+  return Medal;
 }
