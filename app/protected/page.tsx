@@ -12,6 +12,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Leaderboard } from "@/components/leaderboard";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import { RecentResults } from "@/components/recent-results";
 import {
@@ -363,35 +364,8 @@ async function Dashboard() {
               Ratings update automatically when matches are reported.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {data.profiles.slice(0, 8).map((profile, index) => (
-              <div
-                className="grid grid-cols-[2rem_2.75rem_1fr_auto] items-center gap-3 rounded-md border p-3"
-                key={profile.id}
-              >
-                <div className="text-sm font-semibold text-muted-foreground">
-                  #{index + 1}
-                </div>
-                <AvatarThumb
-                  styleName={profile.avatar_style}
-                  seed={profile.avatar_seed ?? profile.id}
-                  label={displayPlayer(profile)}
-                  className="size-11"
-                />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{displayPlayer(profile)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {profile.wins ?? 0}-{profile.losses ?? 0} record
-                  </p>
-                </div>
-                <Badge variant={profile.id === user.id ? "default" : "secondary"}>
-                  {profile.rating ?? 1000}
-                </Badge>
-              </div>
-            ))}
-            {data.profiles.length === 0 ? (
-              <EmptyState text="Create your profile to start the leaderboard." />
-            ) : null}
+          <CardContent>
+            <Leaderboard currentUserId={user.id} profiles={data.profiles} />
           </CardContent>
         </Card>
       </section>
@@ -568,14 +542,6 @@ function PlayerSelect({
           </option>
         ))}
       </select>
-    </div>
-  );
-}
-
-function EmptyState({ text }: { text: string }) {
-  return (
-    <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-      {text}
     </div>
   );
 }
