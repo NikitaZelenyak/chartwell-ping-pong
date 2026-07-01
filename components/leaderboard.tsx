@@ -1,6 +1,7 @@
 "use client";
 
 import { Crown, Medal, Sparkles, Trophy } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -109,10 +110,20 @@ export function Leaderboard({
             >
               #{rank}
             </div>
-            <LeaderboardAvatar profile={profile} rank={rank} />
+            <Link
+              href={`/protected/players/${profile.id}`}
+              aria-label={`Open ${displayPlayer(profile)} profile card`}
+            >
+              <LeaderboardAvatar profile={profile} rank={rank} />
+            </Link>
             <div className="min-w-0">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <p className="truncate font-medium">{displayPlayer(profile)}</p>
+                <Link
+                  href={`/protected/players/${profile.id}`}
+                  className="truncate font-medium hover:text-primary hover:underline"
+                >
+                  {displayPlayer(profile)}
+                </Link>
                 {meta ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 text-[0.68rem] font-medium text-muted-foreground">
                     {meta.icon}
@@ -179,11 +190,16 @@ function ChampionCard({
       <div className="relative grid gap-4 sm:grid-cols-[4.5rem_1fr_auto] sm:items-center">
         <div className="flex items-center gap-3 sm:block">
           <div className="relative">
-            <LeaderboardAvatar
-              className="size-16 ring-4 ring-amber-300/80"
-              profile={profile}
-              rank={1}
-            />
+            <Link
+              href={`/protected/players/${profile.id}`}
+              aria-label={`Open ${displayPlayer(profile)} profile card`}
+            >
+              <LeaderboardAvatar
+                className="size-16 ring-4 ring-amber-300/80"
+                profile={profile}
+                rank={1}
+              />
+            </Link>
             <div className="absolute -right-2 -top-2 grid size-7 place-items-center rounded-full bg-amber-400 text-amber-950 shadow-md shadow-amber-300/50">
               <Crown className="size-4" />
             </div>
@@ -209,9 +225,12 @@ function ChampionCard({
             ) : null}
           </div>
           <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
-            <h3 className="truncate text-2xl font-semibold tracking-normal text-foreground">
+            <Link
+              href={`/protected/players/${profile.id}`}
+              className="truncate text-2xl font-semibold tracking-normal text-foreground hover:text-primary hover:underline"
+            >
               {displayPlayer(profile)}
-            </h3>
+            </Link>
             {isCurrentUser ? (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.68rem] font-medium text-primary sm:hidden">
                 You

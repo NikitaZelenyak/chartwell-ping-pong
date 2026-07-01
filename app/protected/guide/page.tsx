@@ -5,9 +5,9 @@ import {
   CircleGauge,
   ClipboardCheck,
   Medal,
-  Send,
   Swords,
   Trophy,
+  UsersRound,
   UserRound,
 } from "lucide-react";
 
@@ -28,6 +28,24 @@ const ratingExamples = [
   { match: "1000 beats 500", change: "about +2", note: "Expected win" },
   { match: "500 beats 5000", change: "+32 max", note: "Huge upset" },
   { match: "5000 beats 500", change: "+1 min", note: "Heavy favorite" },
+];
+
+const doublesExamples = [
+  {
+    match: "Team 1000 beats Team 1000",
+    player: "players gain about +16",
+    team: "team gains about +16",
+  },
+  {
+    match: "Lower-rated team wins",
+    player: "players gain more",
+    team: "team gains more",
+  },
+  {
+    match: "Higher-rated team wins",
+    player: "players gain less",
+    team: "team gains less",
+  },
 ];
 
 export default function GuidePage() {
@@ -59,7 +77,7 @@ async function GuideContent() {
           Chartwell Ping Pong guide
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Use this page as the operating manual for profiles, ratings, invites,
+          Use this page as the operating manual for profiles, ratings, doubles,
           tournament formats, and match results.
         </p>
       </section>
@@ -71,14 +89,14 @@ async function GuideContent() {
           text="Add your first and last name, choose an avatar, and start with the default rating."
         />
         <WorkflowCard
-          icon={<Send className="size-5" />}
-          title="Challenge players"
-          text="Send a match invite with time, location, and notes. After it is accepted, either player can report the result right from the invite."
-        />
-        <WorkflowCard
           icon={<ClipboardCheck className="size-5" />}
           title="Report games"
           text="Report casual games one at a time. The opponent confirms before ratings move."
+        />
+        <WorkflowCard
+          icon={<UsersRound className="size-5" />}
+          title="Build doubles teams"
+          text="Invite a partner, name your team, and report team matches after the opponent team confirms."
         />
       </section>
 
@@ -157,6 +175,60 @@ rating_delta = max(1, round(32 * (1 - expected)))`}
         <Card className="rounded-md shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <UsersRound className="size-5" />
+              Doubles scoring
+            </CardTitle>
+            <CardDescription>
+              Doubles keeps a team rating while also updating each player&apos;s
+              normal match rating.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <div className="rounded-md border bg-background/80 p-4">
+              <p className="font-medium text-foreground">How doubles points move</p>
+              <div className="mt-3 space-y-2">
+                <GuideStep text="The winning team gains team rating using the same Elo-style formula as singles." />
+                <GuideStep text="The losing team loses the same team rating amount." />
+                <GuideStep text="Each team also gets an average player rating from its two players." />
+                <GuideStep text="All four players then gain or lose normal rating points from those average player ratings." />
+                <GuideStep text="Winners get one win and one doubles win; losers get one loss and one doubles loss." />
+              </div>
+            </div>
+
+            <div className="rounded-md border bg-background/80 p-4">
+              <p className="font-medium text-foreground">Doubles formula</p>
+              <pre className="mt-3 overflow-auto rounded-md bg-muted p-3 text-xs text-foreground">
+{`team_expected = 1 / (1 + 10 ^ ((losing_team_rating - winning_team_rating) / 400))
+team_delta = max(1, round(32 * (1 - team_expected)))
+
+winning_player_average = average(winning players normal ratings)
+losing_player_average = average(losing players normal ratings)
+player_delta = max(1, round(32 * (1 - expected_from_player_averages)))`}
+              </pre>
+            </div>
+
+            <div className="grid gap-2">
+              {doublesExamples.map((example) => (
+                <div
+                  className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_auto_auto]"
+                  key={example.match}
+                >
+                  <p className="font-medium text-foreground">{example.match}</p>
+                  <Badge variant="secondary">{example.team}</Badge>
+                  <Badge variant="outline">{example.player}</Badge>
+                </div>
+              ))}
+            </div>
+
+            <GuideStep text="One player from the opposing team confirms before any rating changes are saved." />
+            <GuideStep text="Teams that share a player cannot play a rated doubles match against each other." />
+            <GuideStep text="There is no separate personal doubles rating to maintain." />
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-md shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Swords className="size-5" />
               Tournament manager
             </CardTitle>
@@ -191,6 +263,27 @@ rating_delta = max(1, round(32 * (1 - expected)))`}
             <GuideStep text="Winner gets one win; loser gets one loss." />
             <GuideStep text="Recent results show the game and rating delta." />
             <GuideStep text="Knockout winners move into the next bracket game." />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <Card className="rounded-md shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Medal className="size-5" />
+              Achievements
+            </CardTitle>
+            <CardDescription>
+              Profiles unlock achievements from singles, doubles, tournaments,
+              and leaderboard milestones.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <GuideStep text="First-place achievements unlock when a player or doubles team reaches the top leaderboard spot." />
+            <GuideStep text="Win-count achievements combine singles wins and doubles wins." />
+            <GuideStep text="Doubles achievements can be earned by accepted teams and long-term partners." />
+            <GuideStep text="Achievements are awarded automatically after confirmed results." />
           </CardContent>
         </Card>
       </section>

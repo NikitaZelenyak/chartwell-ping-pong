@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import {
   Check,
   CircleGauge,
-  Send,
   ShieldAlert,
   Swords,
   Trophy,
@@ -260,9 +259,6 @@ async function Dashboard() {
   const profilesById = new Map(data.profiles.map((profile) => [profile.id, profile]));
   const myProfile = profilesById.get(user.id);
   const rivals = data.profiles.filter((profile) => profile.id !== user.id);
-  const openInvites = data.invites.filter(
-    (invite) => invite.status === "pending",
-  );
   const pendingReports = data.reports.filter((report) => report.status === "pending");
   const recentResults = data.matches.map((match) => {
     const playerOne = profilesById.get(match.player_one_id);
@@ -347,9 +343,9 @@ async function Dashboard() {
           value={data.tournaments.filter((item) => item.status === "open").length}
         />
         <StatTile
-          icon={<Send className="size-5" />}
-          label="Pending invites"
-          value={openInvites.length}
+          icon={<Swords className="size-5" />}
+          label="Rated players"
+          value={data.profiles.length}
         />
       </section>
 
@@ -384,24 +380,6 @@ async function Dashboard() {
         <CardContent>
           <Button asChild className="w-full sm:w-auto">
             <Link href="/protected/tournaments">Open tournaments</Link>
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-md shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Send className="size-5" />
-            Player invites
-          </CardTitle>
-          <CardDescription>
-            Send challenges, edit invite details, accept requests, and report
-            accepted games on a dedicated page.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild className="w-full sm:w-auto">
-            <Link href="/protected/invites">Open invites</Link>
           </Button>
         </CardContent>
       </Card>

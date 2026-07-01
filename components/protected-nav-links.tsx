@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/protected", label: "Dashboard", exact: true },
   { href: "/protected/profile", label: "Profile" },
-  { href: "/protected/invites", label: "Invites" },
+  { href: "/protected/doubles", label: "Doubles" },
   { href: "/protected/tournaments", label: "Tournaments" },
   { href: "/protected/guide", label: "How it works" },
 ];

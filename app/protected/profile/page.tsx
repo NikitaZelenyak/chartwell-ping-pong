@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Check, UserRound } from "lucide-react";
 
+import { AchievementsPanel } from "@/components/achievements-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PingPongLoader } from "@/components/ping-pong-loader";
@@ -24,7 +25,7 @@ import {
   type AvatarOption,
 } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
-import { saveProfile } from "../actions";
+import { saveProfile, syncMyAchievements } from "../actions";
 
 type Profile = {
   id: string;
@@ -33,10 +34,17 @@ type Profile = {
   rating: number | null;
   wins: number | null;
   losses: number | null;
+  doubles_wins: number | null;
+  doubles_losses: number | null;
   preferred_hand: string | null;
   avatar_style: string | null;
   avatar_seed: string | null;
   bio: string | null;
+};
+
+type EarnedAchievement = {
+  achievement_key: string;
+  awarded_at: string | null;
 };
 
 const selectControlClass =
@@ -73,7 +81,7 @@ async function loadProfile(userId: string) {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id,email,display_name,rating,wins,losses,preferred_hand,avatar_style,avatar_seed,bio",
+      "id,email,display_name,rating,wins,losses,doubles_wins,doubles_losses,preferred_hand,avatar_style,avatar_seed,bio",
     )
     .eq("id", userId)
     .maybeSingle();
@@ -83,6 +91,21 @@ async function loadProfile(userId: string) {
   }
 
   return data as Profile | null;
+}
+
+async function loadAchievements(userId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profile_achievements")
+    .select("achievement_key,awarded_at")
+    .eq("profile_id", userId)
+    .order("awarded_at", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return (data ?? []) as EarnedAchievement[];
 }
 
 export default function ProfilePage() {
@@ -104,7 +127,10 @@ async function ProfileContent() {
     redirect("/auth/login");
   }
 
-  const profile = await loadProfile(user.id);
+  const [profile, achievements] = await Promise.all([
+    loadProfile(user.id),
+    loadAchievements(user.id),
+  ]);
   const playerName = displayPlayer(profile, user.email ?? "Player");
 
   return (
@@ -127,10 +153,12 @@ async function ProfileContent() {
           </div>
           <Badge variant="secondary">{ratingBand(profile?.rating ?? null)}</Badge>
         </div>
-        <div className="mt-5 grid grid-cols-3 gap-2 text-sm sm:mt-6 sm:gap-3">
+        <div className="mt-5 grid grid-cols-2 gap-2 text-sm sm:mt-6 sm:grid-cols-5 sm:gap-3">
           <ProfileStat label="Rating" value={profile?.rating ?? 1000} />
           <ProfileStat label="Wins" value={profile?.wins ?? 0} />
           <ProfileStat label="Losses" value={profile?.losses ?? 0} />
+          <ProfileStat label="Doubles wins" value={profile?.doubles_wins ?? 0} />
+          <ProfileStat label="Doubles losses" value={profile?.doubles_losses ?? 0} />
         </div>
       </section>
 
@@ -142,7 +170,7 @@ async function ProfileContent() {
           </CardTitle>
           <CardDescription>
             This profile is used for the leaderboard, tournament entry, and
-            match invitations.
+            doubles teams.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -191,6 +219,26 @@ async function ProfileContent() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-md shadow-sm">
+        <CardContent className="pt-6">
+          <AchievementsPanel achievements={achievements} />
+          <div className="mt-5 flex flex-col gap-3 rounded-md border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium">Already earned something?</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Sync once to award achievements from existing ratings, wins,
+                teams, and tournament history.
+              </p>
+            </div>
+            <form action={syncMyAchievements}>
+              <Button type="submit" variant="outline" className="w-full sm:w-auto">
+                Sync achievements
+              </Button>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>

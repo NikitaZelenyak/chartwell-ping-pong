@@ -2,7 +2,6 @@ import {
   CalendarDays,
   ChevronRight,
   CircleGauge,
-  Send,
   Swords,
   Trophy,
   UserRound,
@@ -159,8 +158,8 @@ async function HomeContent() {
             Chartwell Ping Pong
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-            Create a player profile, join local tournaments, challenge another
-            player, and keep every result tied to a rating that moves after each
+            Create a player profile, join local tournaments, build doubles
+            teams, and keep every result tied to a rating that moves after each
             match.
           </p>
           <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
@@ -250,13 +249,21 @@ async function HomeContent() {
                       key={player.id}
                     >
                       <span className="text-muted-foreground">#{index + 1}</span>
-                      <LeaderboardAvatar player={player} />
-                      <span className="min-w-0 truncate">
+                      <Link
+                        href={`/protected/players/${player.id}`}
+                        aria-label={`Open ${displayPlayer(player)} profile card`}
+                      >
+                        <LeaderboardAvatar player={player} />
+                      </Link>
+                      <Link
+                        href={`/protected/players/${player.id}`}
+                        className="min-w-0 truncate hover:text-primary hover:underline"
+                      >
                         {displayPlayer(player)}
                         <span className="ml-1 text-muted-foreground">
                           ({player.wins ?? 0}-{player.losses ?? 0})
                         </span>
-                      </span>
+                      </Link>
                       <Badge variant="secondary">{player.rating ?? 1000}</Badge>
                     </div>
                   ))
@@ -281,9 +288,9 @@ async function HomeContent() {
             text="Set venue, start time, player cap, rating range, and registration status."
           />
           <Workflow
-            icon={<Send className="size-5" />}
-            title="Challenge players"
-            text="Send one-to-one match invites with time, table, and match notes."
+            icon={<Swords className="size-5" />}
+            title="Build doubles teams"
+            text="Create teams with another player and report team results after confirmation."
           />
           <Workflow
             icon={<CircleGauge className="size-5" />}

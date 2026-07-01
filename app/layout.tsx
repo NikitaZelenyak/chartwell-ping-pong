@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Chartwell Ping Pong",
   description:
-    "Tournament registration, match invites, player profiles, and ratings for Chartwell Ping Pong.",
+    "Tournament registration, doubles teams, player profiles, and ratings for Chartwell Ping Pong.",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { AchievementKey } from "@/lib/achievements";
 import { safeAvatarSeed, safeAvatarStyle } from "@/lib/avatars";
 import { dateTimeLocalToIso } from "@/lib/datetime";
 
@@ -35,6 +36,181 @@ function cleanTournamentFormat(value: FormDataEntryValue | null) {
   return format === "round_robin" ? "round_robin" : "single_elimination";
 }
 
+function orderedPair(firstId: string, secondId: string) {
+  return [firstId, secondId].sort() as [string, string];
+}
+
+async function awardAchievement(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  profileId: string,
+  achievementKey: AchievementKey,
+  sourceType?: string,
+  sourceId?: string | null,
+) {
+  await supabase.rpc("award_profile_achievement", {
+    p_profile_id: profileId,
+    p_achievement_key: achievementKey,
+    p_source_type: sourceType ?? null,
+    p_source_id: sourceId ?? null,
+  });
+}
+
+async function evaluateProfileAchievements(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  profileId: string,
+  source?: {
+    id?: string | null;
+    type?: string;
+    winnerIds?: string[];
+    ratingDelta?: number | null;
+  },
+) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id,rating,wins,losses,doubles_wins,doubles_losses")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (!profile) {
+    return;
+  }
+
+  const totalWins = profile.wins ?? 0;
+  const totalMatches = totalWins + (profile.losses ?? 0);
+
+  if (totalWins >= 1) {
+    await awardAchievement(supabase, profileId, "first_win", source?.type, source?.id);
+  }
+  if (totalWins >= 10) {
+    await awardAchievement(supabase, profileId, "wins_10", source?.type, source?.id);
+  }
+  if (totalWins >= 25) {
+    await awardAchievement(supabase, profileId, "wins_25", source?.type, source?.id);
+  }
+  if (totalWins >= 50) {
+    await awardAchievement(supabase, profileId, "wins_50", source?.type, source?.id);
+  }
+  if (totalWins >= 100) {
+    await awardAchievement(supabase, profileId, "wins_100", source?.type, source?.id);
+  }
+  if (totalMatches >= 25) {
+    await awardAchievement(supabase, profileId, "table_regular", source?.type, source?.id);
+  }
+  if (
+    source?.winnerIds?.includes(profileId) &&
+    typeof source.ratingDelta === "number"
+  ) {
+    if (source.ratingDelta >= 18) {
+      await awardAchievement(supabase, profileId, "comeback_player", source.type, source.id);
+    }
+    if (source.ratingDelta >= 24) {
+      await awardAchievement(supabase, profileId, "upset_alert", source.type, source.id);
+    }
+    if (source.ratingDelta >= 30) {
+      await awardAchievement(supabase, profileId, "giant_slayer", source.type, source.id);
+    }
+  }
+
+  const { data: topSingles } = await supabase
+    .from("profiles")
+    .select("id")
+    .order("rating", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (topSingles?.id === profileId) {
+    await awardAchievement(supabase, profileId, "singles_king", "leaderboard", profileId);
+  }
+
+  const { data: myTeams } = await supabase
+    .from("doubles_teams")
+    .select("id,created_by,rating,wins")
+    .or(`player_one_id.eq.${profileId},player_two_id.eq.${profileId}`);
+
+  if (myTeams?.length) {
+    await awardAchievement(supabase, profileId, "doubles_debut", "doubles_team", myTeams[0].id);
+  }
+
+  if ((myTeams ?? []).filter((team) => team.created_by === profileId).length >= 3) {
+    await awardAchievement(supabase, profileId, "team_builder", "doubles_team", profileId);
+  }
+
+  const tenWinTeam = (myTeams ?? []).find((team) => (team.wins ?? 0) >= 10);
+  if (tenWinTeam) {
+    await awardAchievement(supabase, profileId, "trusted_partner", "doubles_team", tenWinTeam.id);
+    await awardAchievement(supabase, profileId, "perfect_partner", "doubles_team", tenWinTeam.id);
+  }
+
+  const { data: topDoubles } = await supabase
+    .from("doubles_teams")
+    .select("id,player_one_id,player_two_id")
+    .order("rating", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (
+    topDoubles &&
+    [topDoubles.player_one_id, topDoubles.player_two_id].includes(profileId)
+  ) {
+    await awardAchievement(supabase, profileId, "doubles_dynasty", "doubles_team", topDoubles.id);
+  }
+
+  const { data: tournamentWinner } = await supabase
+    .from("tournament_entries")
+    .select("tournament_id")
+    .eq("user_id", profileId)
+    .eq("status", "winner")
+    .limit(1)
+    .maybeSingle();
+
+  if (tournamentWinner) {
+    await awardAchievement(
+      supabase,
+      profileId,
+      "tournament_winner",
+      "tournament",
+      tournamentWinner.tournament_id,
+    );
+  }
+
+  const { count: tournamentWins } = await supabase
+    .from("matches")
+    .select("id", { count: "exact", head: true })
+    .eq("winner_id", profileId)
+    .not("tournament_id", "is", null);
+
+  if ((tournamentWins ?? 0) >= 3) {
+    await awardAchievement(supabase, profileId, "bracket_climber", "match", profileId);
+  }
+
+  const { count: roundRobinGames } = await supabase
+    .from("matches")
+    .select("id,tournaments!inner(format)", { count: "exact", head: true })
+    .or(`player_one_id.eq.${profileId},player_two_id.eq.${profileId}`)
+    .eq("tournaments.format", "round_robin");
+
+  if ((roundRobinGames ?? 0) >= 5) {
+    await awardAchievement(supabase, profileId, "round_robin_grinder", "match", profileId);
+  }
+
+  if (totalWins >= 3) {
+    await awardAchievement(supabase, profileId, "hot_streak", source?.type, source?.id);
+  }
+  if (totalWins >= 5) {
+    await awardAchievement(supabase, profileId, "on_fire", source?.type, source?.id);
+  }
+}
+
+async function evaluateProfilesAchievements(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  profileIds: string[],
+  source?: Parameters<typeof evaluateProfileAchievements>[2],
+) {
+  for (const profileId of new Set(profileIds)) {
+    await evaluateProfileAchievements(supabase, profileId, source);
+  }
+}
+
 function cleanAvatarChoice(
   value: FormDataEntryValue | null,
   fallbackStyle: string,
@@ -46,6 +222,19 @@ function cleanAvatarChoice(
     avatar_style: safeAvatarStyle(style, fallbackStyle),
     avatar_seed: safeAvatarSeed(seed, fallbackSeed),
   };
+}
+
+export async function syncMyAchievements() {
+  const { supabase, user } = await getCurrentUser();
+
+  await evaluateProfileAchievements(supabase, user.id, {
+    id: user.id,
+    type: "profile_sync",
+  });
+
+  revalidatePath("/protected");
+  revalidatePath("/protected/profile");
+  revalidatePath(`/protected/players/${user.id}`);
 }
 
 export async function saveProfile(formData: FormData) {
@@ -459,7 +648,7 @@ export async function reportTournamentGame(formData: FormData) {
     throw new Error("Both players are required before reporting a winner.");
   }
 
-  const { error: ratingError } = await supabase.rpc("report_match", {
+  const { data: matchId, error: ratingError } = await supabase.rpc("report_match", {
     p_player_one: game.player_one_id,
     p_player_two: game.player_two_id,
     p_winner: winnerId,
@@ -473,6 +662,16 @@ export async function reportTournamentGame(formData: FormData) {
   if (ratingError) {
     throw new Error(ratingError.message);
   }
+
+  await evaluateProfilesAchievements(
+    supabase,
+    [game.player_one_id, game.player_two_id],
+    {
+      id: matchId,
+      type: "match",
+      winnerIds: [winnerId],
+    },
+  );
 
   const { error: updateError } = await supabase
     .from("tournament_games")
@@ -532,6 +731,12 @@ export async function reportTournamentGame(formData: FormData) {
         .eq("id", game.tournament_id);
     }
   }
+
+  await evaluateProfileAchievements(supabase, winnerId, {
+    id: matchId,
+    type: "match",
+    winnerIds: [winnerId],
+  });
 
   revalidatePath("/protected");
   revalidatePath("/protected/tournaments");
@@ -765,7 +970,7 @@ export async function confirmMatchReport(formData: FormData) {
     throw new Error("Match report is required.");
   }
 
-  const { error } = await supabase.rpc("confirm_match_report", {
+  const { data: matchId, error } = await supabase.rpc("confirm_match_report", {
     p_report_id: reportId,
   });
 
@@ -773,8 +978,30 @@ export async function confirmMatchReport(formData: FormData) {
     throw new Error(error.message);
   }
 
+  if (matchId) {
+    const { data: match } = await supabase
+      .from("matches")
+      .select("player_one_id,player_two_id,winner_id,rating_delta")
+      .eq("id", matchId)
+      .maybeSingle();
+
+    if (match) {
+      await evaluateProfilesAchievements(
+        supabase,
+        [match.player_one_id, match.player_two_id],
+        {
+          id: matchId,
+          type: "match",
+          winnerIds: [match.winner_id],
+          ratingDelta: match.rating_delta,
+        },
+      );
+    }
+  }
+
   revalidatePath("/protected/invites");
   revalidatePath("/protected");
+  revalidatePath("/protected/profile");
 }
 
 export async function declineMatchReport(formData: FormData) {
@@ -802,4 +1029,345 @@ export async function declineMatchReport(formData: FormData) {
 
   revalidatePath("/protected/invites");
   revalidatePath("/protected");
+}
+
+export async function createDoublesTeamInvite(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const partnerId = cleanString(formData.get("partner_id"));
+  const teamName = cleanString(formData.get("team_name"));
+
+  if (!partnerId || partnerId === user.id) {
+    throw new Error("Choose another player as your doubles partner.");
+  }
+
+  if (!teamName) {
+    throw new Error("Team name is required.");
+  }
+
+  const [playerOneId, playerTwoId] = orderedPair(user.id, partnerId);
+
+  const { data: existingTeam } = await supabase
+    .from("doubles_teams")
+    .select("id")
+    .eq("player_one_id", playerOneId)
+    .eq("player_two_id", playerTwoId)
+    .maybeSingle();
+
+  if (existingTeam) {
+    throw new Error("You already have an accepted doubles team with this player.");
+  }
+
+  const { error } = await supabase.from("doubles_team_invites").insert({
+    created_by: user.id,
+    invited_user_id: partnerId,
+    player_one_id: playerOneId,
+    player_two_id: playerTwoId,
+    team_name: teamName,
+    status: "pending",
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/doubles");
+}
+
+export async function respondToDoublesTeamInvite(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const inviteId = cleanString(formData.get("invite_id"));
+  const status = cleanString(formData.get("status"));
+
+  if (!inviteId || !["accepted", "declined", "cancelled"].includes(status ?? "")) {
+    throw new Error("Team invite response is invalid.");
+  }
+
+  const { data: invite, error: inviteError } = await supabase
+    .from("doubles_team_invites")
+    .select("*")
+    .eq("id", inviteId)
+    .single();
+
+  if (inviteError || !invite) {
+    throw new Error(inviteError?.message ?? "Team invite not found.");
+  }
+
+  if (invite.status !== "pending") {
+    throw new Error("This team invite has already been handled.");
+  }
+
+  if (status === "cancelled" && invite.created_by !== user.id) {
+    throw new Error("Only the sender can cancel this team invite.");
+  }
+
+  if (["accepted", "declined"].includes(status ?? "") && invite.invited_user_id !== user.id) {
+    throw new Error("Only the invited player can respond.");
+  }
+
+  let acceptedTeamId: string | null = null;
+
+  if (status === "accepted") {
+    const { data: existingTeam } = await supabase
+      .from("doubles_teams")
+      .select("id")
+      .eq("player_one_id", invite.player_one_id)
+      .eq("player_two_id", invite.player_two_id)
+      .maybeSingle();
+
+    if (existingTeam) {
+      acceptedTeamId = existingTeam.id;
+    } else {
+      const { data: team, error: teamError } = await supabase
+        .from("doubles_teams")
+        .insert({
+          name: invite.team_name,
+          created_by: invite.created_by,
+          player_one_id: invite.player_one_id,
+          player_two_id: invite.player_two_id,
+        })
+        .select("id")
+        .single();
+
+      if (teamError || !team) {
+        throw new Error(teamError?.message ?? "Could not create doubles team.");
+      }
+
+      acceptedTeamId = team.id;
+    }
+  }
+
+  const { error } = await supabase
+    .from("doubles_team_invites")
+    .update({
+      status,
+      accepted_team_id: acceptedTeamId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", inviteId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (acceptedTeamId) {
+    await evaluateProfilesAchievements(
+      supabase,
+      [invite.player_one_id, invite.player_two_id],
+      { id: acceptedTeamId, type: "doubles_team" },
+    );
+  }
+
+  revalidatePath("/protected/doubles");
+  revalidatePath("/protected/profile");
+}
+
+export async function deleteDoublesTeamInvite(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const inviteId = cleanString(formData.get("invite_id"));
+
+  if (!inviteId) {
+    throw new Error("Team invite is required.");
+  }
+
+  const { error } = await supabase
+    .from("doubles_team_invites")
+    .delete()
+    .eq("id", inviteId)
+    .or(`created_by.eq.${user.id},invited_user_id.eq.${user.id}`);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/doubles");
+}
+
+export async function renameDoublesTeam(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const teamId = cleanString(formData.get("team_id"));
+  const teamName = cleanString(formData.get("team_name"));
+
+  if (!teamId || !teamName) {
+    throw new Error("Team and team name are required.");
+  }
+
+  const { error } = await supabase
+    .from("doubles_teams")
+    .update({ name: teamName })
+    .eq("id", teamId)
+    .or(`player_one_id.eq.${user.id},player_two_id.eq.${user.id}`);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/doubles");
+}
+
+export async function submitDoublesMatchReport(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const teamOneId = cleanString(formData.get("team_one_id"));
+  const teamTwoId = cleanString(formData.get("team_two_id"));
+  const winnerTeamId = cleanString(formData.get("winner_team_id"));
+
+  if (!teamOneId || !teamTwoId || !winnerTeamId || teamOneId === teamTwoId) {
+    throw new Error("Choose two different doubles teams and a winner.");
+  }
+
+  if (![teamOneId, teamTwoId].includes(winnerTeamId)) {
+    throw new Error("Winner must be one of the selected teams.");
+  }
+
+  const { data: teams, error: teamsError } = await supabase
+    .from("doubles_teams")
+    .select("id,player_one_id,player_two_id")
+    .in("id", [teamOneId, teamTwoId]);
+
+  if (teamsError || !teams || teams.length !== 2) {
+    throw new Error(teamsError?.message ?? "Both doubles teams are required.");
+  }
+
+  const teamOne = teams.find((team) => team.id === teamOneId);
+  const teamTwo = teams.find((team) => team.id === teamTwoId);
+
+  if (!teamOne || !teamTwo) {
+    throw new Error("Both doubles teams are required.");
+  }
+
+  const teamOnePlayers = [teamOne.player_one_id, teamOne.player_two_id];
+  const teamTwoPlayers = [teamTwo.player_one_id, teamTwo.player_two_id];
+
+  if (teamOnePlayers.some((playerId) => teamTwoPlayers.includes(playerId))) {
+    throw new Error("Teams sharing a player cannot play a rated doubles match.");
+  }
+
+  const reporterTeamId = teamOnePlayers.includes(user.id)
+    ? teamOneId
+    : teamTwoPlayers.includes(user.id)
+      ? teamTwoId
+      : null;
+
+  if (!reporterTeamId) {
+    throw new Error("You must belong to one selected doubles team.");
+  }
+
+  const responderTeamId = reporterTeamId === teamOneId ? teamTwoId : teamOneId;
+
+  const { error } = await supabase.from("doubles_match_reports").insert({
+    reporter_id: user.id,
+    team_one_id: teamOneId,
+    team_two_id: teamTwoId,
+    winner_team_id: winnerTeamId,
+    responder_team_id: responderTeamId,
+    team_one_score: Math.max(0, cleanNumber(formData.get("team_one_score"), 0)),
+    team_two_score: Math.max(0, cleanNumber(formData.get("team_two_score"), 0)),
+    status: "pending",
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/doubles");
+}
+
+export async function confirmDoublesMatchReport(formData: FormData) {
+  const { supabase } = await getCurrentUser();
+  const reportId = cleanString(formData.get("report_id"));
+
+  if (!reportId) {
+    throw new Error("Doubles report is required.");
+  }
+
+  const { data: matchId, error } = await supabase.rpc(
+    "confirm_doubles_match_report",
+    { p_report_id: reportId },
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (matchId) {
+    const { data: match } = await supabase
+      .from("doubles_matches")
+      .select("team_one_id,team_two_id,winner_team_id,profile_rating_delta")
+      .eq("id", matchId)
+      .maybeSingle();
+
+    if (match) {
+      const { data: teams } = await supabase
+        .from("doubles_teams")
+        .select("id,player_one_id,player_two_id")
+        .in("id", [match.team_one_id, match.team_two_id]);
+
+      const profileIds =
+        teams?.flatMap((team) => [team.player_one_id, team.player_two_id]) ?? [];
+      const winnerTeam = teams?.find((team) => team.id === match.winner_team_id);
+      const winnerIds = winnerTeam
+        ? [winnerTeam.player_one_id, winnerTeam.player_two_id]
+        : [];
+
+      await evaluateProfilesAchievements(supabase, profileIds, {
+        id: matchId,
+        type: "doubles_match",
+        winnerIds,
+        ratingDelta: match.profile_rating_delta,
+      });
+    }
+  }
+
+  revalidatePath("/protected/doubles");
+  revalidatePath("/protected/profile");
+}
+
+export async function declineDoublesMatchReport(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const reportId = cleanString(formData.get("report_id"));
+
+  if (!reportId) {
+    throw new Error("Doubles report is required.");
+  }
+
+  const { data: report, error: reportError } = await supabase
+    .from("doubles_match_reports")
+    .select("id,responder_team_id,status")
+    .eq("id", reportId)
+    .single();
+
+  if (reportError || !report) {
+    throw new Error(reportError?.message ?? "Doubles report not found.");
+  }
+
+  if (report.status !== "pending") {
+    throw new Error("This doubles report has already been handled.");
+  }
+
+  const { data: responderTeam } = await supabase
+    .from("doubles_teams")
+    .select("player_one_id,player_two_id")
+    .eq("id", report.responder_team_id)
+    .maybeSingle();
+
+  if (
+    !responderTeam ||
+    ![responderTeam.player_one_id, responderTeam.player_two_id].includes(user.id)
+  ) {
+    throw new Error("Only a player from the opposing team can decline this report.");
+  }
+
+  const { error } = await supabase
+    .from("doubles_match_reports")
+    .update({
+      status: "declined",
+      responded_by: user.id,
+      responded_at: new Date().toISOString(),
+    })
+    .eq("id", reportId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/protected/doubles");
 }
