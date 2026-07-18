@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 export function UpdatePasswordForm({
@@ -66,8 +67,20 @@ export function UpdatePasswordForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save new password"}
+              <Button
+                aria-busy={isLoading}
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <LoaderCircle className="animate-spin" />
+                    Saving…
+                  </>
+                ) : (
+                  "Save new password"
+                )}
               </Button>
             </div>
           </form>

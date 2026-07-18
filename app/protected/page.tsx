@@ -11,6 +11,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Leaderboard } from "@/components/leaderboard";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import { RecentResults } from "@/components/recent-results";
@@ -411,10 +412,14 @@ async function Dashboard() {
                 </select>
               </div>
               <Field label="Game score" name="score_summary" placeholder="11-7" />
-              <Button type="submit" disabled={rivals.length === 0} className="w-full sm:w-auto">
+              <SubmitButton
+                disabled={rivals.length === 0}
+                pendingLabel="Sending report…"
+                className="w-full sm:w-auto"
+              >
                 <Check className="size-4" />
                 Send for confirmation
-              </Button>
+              </SubmitButton>
             </form>
             <div className="mt-6 border-t pt-5">
               <p className="font-medium">Pending confirmations</p>
@@ -573,15 +578,15 @@ function MatchReportCard({
         <div className="mt-3 grid gap-2 sm:flex">
           <form action={confirmMatchReport}>
             <input type="hidden" name="report_id" value={report.id} />
-            <Button type="submit" size="sm" className="w-full sm:w-auto">
+            <SubmitButton pendingLabel="Confirming…" size="sm" className="w-full sm:w-auto">
               Confirm
-            </Button>
+            </SubmitButton>
           </form>
           <form action={declineMatchReport}>
             <input type="hidden" name="report_id" value={report.id} />
-            <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+            <SubmitButton pendingLabel="Declining…" size="sm" variant="outline" className="w-full sm:w-auto">
               Decline
-            </Button>
+            </SubmitButton>
           </form>
         </div>
       ) : null}

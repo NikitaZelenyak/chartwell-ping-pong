@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
+import { Suspense } from "react";
+
+import { NavigationFeedback } from "@/components/navigation-feedback";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -32,6 +35,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <NavigationFeedback />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>

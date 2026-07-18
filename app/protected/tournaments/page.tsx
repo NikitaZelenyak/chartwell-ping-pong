@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
@@ -229,10 +229,10 @@ async function Tournaments() {
                 <Field label="Min rating" name="skill_floor" type="number" defaultValue={900} min={0} />
                 <Field label="Max rating" name="skill_ceiling" type="number" defaultValue={2400} min={0} />
               </div>
-              <Button type="submit" className="w-full sm:w-auto">
+              <SubmitButton pendingLabel="Creating tournament…" className="w-full sm:w-auto">
                 <Trophy className="size-4" />
                 Create tournament
-              </Button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>
@@ -305,9 +305,9 @@ async function Tournaments() {
                     {!joined && tournament.status === "open" && !isFull ? (
                       <form action={joinTournament}>
                         <input type="hidden" name="tournament_id" value={tournament.id} />
-                        <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+                        <SubmitButton pendingLabel="Joining…" size="sm" variant="outline" className="w-full sm:w-auto">
                           Join tournament
-                        </Button>
+                        </SubmitButton>
                       </form>
                     ) : null}
                     {!joined && tournament.status === "open" && isFull ? (
@@ -317,14 +317,14 @@ async function Tournaments() {
                       <div className="grid gap-1">
                         <form action={startTournament}>
                           <input type="hidden" name="tournament_id" value={tournament.id} />
-                          <Button
-                            type="submit"
+                          <SubmitButton
+                            pendingLabel="Starting…"
                             size="sm"
                             className="w-full sm:w-auto"
                             disabled={!canStart}
                           >
                             Start tournament
-                          </Button>
+                          </SubmitButton>
                         </form>
                         {!canStart ? (
                           <p className="text-xs text-muted-foreground">
@@ -337,15 +337,15 @@ async function Tournaments() {
                     {tournament.organizer_id === user.id ? (
                       <form action={deleteTournament}>
                         <input type="hidden" name="tournament_id" value={tournament.id} />
-                        <Button
-                          type="submit"
+                        <SubmitButton
+                          pendingLabel="Removing…"
                           size="sm"
                           variant="destructive"
                           className="w-full sm:w-auto"
                         >
                           <Trash2 className="size-4" />
                           Remove
-                        </Button>
+                        </SubmitButton>
                       </form>
                     ) : null}
                   </div>

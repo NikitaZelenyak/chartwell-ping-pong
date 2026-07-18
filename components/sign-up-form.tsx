@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 export function SignUpForm({
@@ -96,8 +97,20 @@ export function SignUpForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
+              <Button
+                aria-busy={isLoading}
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <LoaderCircle className="animate-spin" />
+                    Creating account…
+                  </>
+                ) : (
+                  "Sign up"
+                )}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

@@ -15,7 +15,7 @@ import {
 import { DoublesMatchReportForm } from "@/components/doubles-match-report-form";
 import { DoublesTeamLeaderboard } from "@/components/doubles-leaderboards";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   Card,
   CardContent,
@@ -253,10 +253,10 @@ async function DoublesContent() {
                 placeholder="Spin Partners"
                 required
               />
-              <Button type="submit" disabled={rivals.length === 0} className="w-full sm:w-auto">
+              <SubmitButton disabled={rivals.length === 0} pendingLabel="Sending invite…" className="w-full sm:w-auto">
                 <Send className="size-4" />
                 Send team invite
-              </Button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>
@@ -366,10 +366,10 @@ async function DoublesContent() {
                 <form action={renameDoublesTeam} className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
                   <input type="hidden" name="team_id" value={team.id} />
                   <Input name="team_name" defaultValue={team.name} required />
-                  <Button type="submit" variant="outline" className="w-full sm:w-auto">
+                  <SubmitButton pendingLabel="Renaming…" variant="outline" className="w-full sm:w-auto">
                     <Pencil className="size-4" />
                     Rename
-                  </Button>
+                  </SubmitButton>
                 </form>
               </div>
             ))}
@@ -435,15 +435,15 @@ async function DoublesContent() {
                   <div className="mt-4 grid gap-2 sm:flex">
                     <form action={confirmDoublesMatchReport}>
                       <input type="hidden" name="report_id" value={report.id} />
-                      <Button type="submit" size="sm" className="w-full sm:w-auto">
+                      <SubmitButton pendingLabel="Confirming…" size="sm" className="w-full sm:w-auto">
                         Confirm
-                      </Button>
+                      </SubmitButton>
                     </form>
                     <form action={declineDoublesMatchReport}>
                       <input type="hidden" name="report_id" value={report.id} />
-                      <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+                      <SubmitButton pendingLabel="Declining…" size="sm" variant="outline" className="w-full sm:w-auto">
                         Decline
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </div>
                 ) : null}
@@ -516,10 +516,10 @@ function TeamInviteAction({
     <form action={respondToDoublesTeamInvite} className="w-full sm:w-auto">
       <input type="hidden" name="invite_id" value={inviteId} />
       <input type="hidden" name="status" value={status} />
-      <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+      <SubmitButton pendingLabel="Updating…" size="sm" variant="outline" className="w-full sm:w-auto">
         {icon}
         {label}
-      </Button>
+      </SubmitButton>
     </form>
   );
 }
@@ -528,10 +528,10 @@ function DeleteTeamInviteAction({ inviteId }: { inviteId: string }) {
   return (
     <form action={deleteDoublesTeamInvite} className="w-full sm:w-auto">
       <input type="hidden" name="invite_id" value={inviteId} />
-      <Button type="submit" size="sm" variant="destructive" className="w-full sm:w-auto">
+      <SubmitButton pendingLabel="Removing…" size="sm" variant="destructive" className="w-full sm:w-auto">
         <Trash2 className="size-4" />
         Remove
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

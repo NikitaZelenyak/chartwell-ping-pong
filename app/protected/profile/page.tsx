@@ -12,7 +12,7 @@ import {
 
 import { AchievementsPanel } from "@/components/achievements-panel";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
@@ -233,10 +233,10 @@ async function ProfileContent() {
               />
             </div>
             <div className="md:col-span-2">
-              <Button type="submit" className="w-full sm:w-auto">
+              <SubmitButton pendingLabel="Saving profile…" className="w-full sm:w-auto">
                 <Check className="size-4" />
                 Save profile
-              </Button>
+              </SubmitButton>
             </div>
           </form>
         </CardContent>
@@ -254,9 +254,9 @@ async function ProfileContent() {
               </p>
             </div>
             <form action={syncMyAchievements}>
-              <Button type="submit" variant="outline" className="w-full sm:w-auto">
+              <SubmitButton pendingLabel="Syncing…" variant="outline" className="w-full sm:w-auto">
                 Sync achievements
-              </Button>
+              </SubmitButton>
             </form>
           </div>
         </CardContent>

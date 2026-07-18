@@ -3,9 +3,9 @@
 import { Check } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { submitDoublesMatchReport } from "@/app/protected/actions";
 
 type DoublesTeamOption = {
@@ -125,14 +125,14 @@ export function DoublesMatchReportForm({
           <Input id="team_two_score" name="team_two_score" min={0} type="number" />
         </div>
       </div>
-      <Button
-        type="submit"
+      <SubmitButton
+        pendingLabel="Sending report…"
         disabled={myTeams.length === 0 || opponentTeams.length === 0 || !teamTwoId}
         className="w-full sm:w-auto"
       >
         <Check className="size-4" />
         Send for confirmation
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

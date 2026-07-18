@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   Card,
   CardContent,
@@ -429,9 +429,9 @@ function TournamentGameRow({
               value={game.player_two_id}
             />
             <div className="flex items-end">
-              <Button type="submit" size="sm" variant="outline" className="w-full">
+              <SubmitButton pendingLabel="Saving…" size="sm" variant="outline" className="w-full">
                 Save pairing
-              </Button>
+              </SubmitButton>
             </div>
           </form>
 
@@ -537,9 +537,9 @@ function WinnerButton({
     <form action={reportTournamentGame}>
       <input type="hidden" name="game_id" value={gameId} />
       <input type="hidden" name="winner_id" value={playerId} />
-      <Button type="submit" size="sm" className="w-full">
+      <SubmitButton pendingLabel="Reporting…" size="sm" className="w-full">
         {playerName} won
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

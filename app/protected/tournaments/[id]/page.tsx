@@ -14,6 +14,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
@@ -222,9 +223,9 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
             !isFull ? (
               <form action={joinTournament}>
                 <input type="hidden" name="tournament_id" value={data.tournament.id} />
-                <Button type="submit" className="w-full">
+                <SubmitButton pendingLabel="Joining…" className="w-full">
                   Join tournament
-                </Button>
+                </SubmitButton>
               </form>
             ) : null}
             {!isParticipant &&
@@ -237,13 +238,13 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
               <div className="grid gap-1">
                 <form action={startTournament}>
                   <input type="hidden" name="tournament_id" value={data.tournament.id} />
-                  <Button
-                    type="submit"
+                  <SubmitButton
+                    pendingLabel="Starting…"
                     className="w-full"
                     disabled={!canStart}
                   >
                     Start tournament
-                  </Button>
+                  </SubmitButton>
                 </form>
                 {!canStart ? (
                   <p className="text-xs text-muted-foreground">
@@ -308,8 +309,8 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
                   </p>
                 </div>
               </div>
-              <Button
-                type="submit"
+              <SubmitButton
+                pendingLabel="Saving settings…"
                 className="w-full sm:w-auto"
                 disabled={["completed", "cancelled"].includes(
                   data.tournament.status ?? "",
@@ -317,7 +318,7 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
               >
                 <Save className="size-4" />
                 Save tournament settings
-              </Button>
+              </SubmitButton>
             </form>
 
             <form action={deleteTournament} className="rounded-md border border-destructive/25 bg-destructive/5 p-4">
@@ -330,10 +331,10 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
                     board. Existing match history stays in ratings history.
                   </p>
                 </div>
-                <Button type="submit" variant="destructive" className="w-full sm:w-auto">
+                <SubmitButton pendingLabel="Removing…" variant="destructive" className="w-full sm:w-auto">
                   <Trash2 className="size-4" />
                   Remove tournament
-                </Button>
+                </SubmitButton>
               </div>
             </form>
           </CardContent>

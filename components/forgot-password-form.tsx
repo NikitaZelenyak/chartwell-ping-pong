@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 export function ForgotPasswordForm({
@@ -83,8 +84,20 @@ export function ForgotPasswordForm({
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send reset email"}
+                <Button
+                  aria-busy={isLoading}
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <LoaderCircle className="animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    "Send reset email"
+                  )}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">

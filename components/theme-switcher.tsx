@@ -37,7 +37,7 @@ const ThemeSwitcher = () => {
           variant="outline"
           size="sm"
         >
-          <PinPongMark className="size-6 rounded-sm" />
+          <PinPongMark className="hidden size-6 rounded-sm sm:block" />
           {theme === "light" ? (
             <Sun
               key="light"

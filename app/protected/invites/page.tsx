@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Check, Pencil, Send, ShieldAlert, Swords, Trash2, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import {
   Card,
@@ -187,10 +187,10 @@ async function InvitesContent() {
                 <Label htmlFor="note">Note</Label>
                 <Textarea id="note" name="note" placeholder="Best of 5? Warmup time?" />
               </div>
-              <Button type="submit" disabled={rivals.length === 0} className="w-full sm:w-auto">
+              <SubmitButton disabled={rivals.length === 0} pendingLabel="Sending invite…" className="w-full sm:w-auto">
                 <Send className="size-4" />
                 Send invite
-              </Button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>
@@ -396,10 +396,10 @@ function EditInviteForm({ invite }: { invite: MatchInvite }) {
           placeholder="Best of 5? Warmup time?"
         />
       </div>
-      <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+      <SubmitButton pendingLabel="Saving…" size="sm" variant="outline" className="w-full sm:w-auto">
         <Check className="size-4" />
         Save changes
-      </Button>
+      </SubmitButton>
     </form>
   );
 }
@@ -442,10 +442,10 @@ function InviteResultForm({
           <Label htmlFor={scoreId}>Score</Label>
           <Input id={scoreId} name="score_summary" placeholder="11-7" />
         </div>
-        <Button type="submit" className="w-full sm:w-auto">
+        <SubmitButton pendingLabel="Reporting…" className="w-full sm:w-auto">
           <Check className="size-4" />
           Report
-        </Button>
+        </SubmitButton>
       </div>
       <p className="text-xs leading-5 text-muted-foreground">
         Ratings update after the other player confirms the result.
@@ -469,10 +469,10 @@ function InviteAction({
     <form action={respondToInvite} className="w-full sm:w-auto">
       <input type="hidden" name="invite_id" value={inviteId} />
       <input type="hidden" name="status" value={status} />
-      <Button type="submit" size="sm" variant="outline" className="w-full sm:w-auto">
+      <SubmitButton pendingLabel="Updating…" size="sm" variant="outline" className="w-full sm:w-auto">
         {icon}
         {label}
-      </Button>
+      </SubmitButton>
     </form>
   );
 }
@@ -481,10 +481,10 @@ function DeleteInviteAction({ inviteId }: { inviteId: string }) {
   return (
     <form action={deleteInvite} className="w-full sm:w-auto">
       <input type="hidden" name="invite_id" value={inviteId} />
-      <Button type="submit" size="sm" variant="destructive" className="w-full sm:w-auto">
+      <SubmitButton pendingLabel="Removing…" size="sm" variant="destructive" className="w-full sm:w-auto">
         <Trash2 className="size-4" />
         Remove invite
-      </Button>
+      </SubmitButton>
     </form>
   );
 }
