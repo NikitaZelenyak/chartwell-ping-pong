@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   APP_TIME_ZONE,
@@ -51,9 +52,6 @@ type InvitesData = {
   invites: MatchInvite[];
   setupError: string | null;
 };
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 function displayPlayer(profile?: Profile, fallback = "Unknown player") {
   if (!profile) {
@@ -345,10 +343,9 @@ function PlayerSelect({
   return (
     <div className="grid gap-2">
       <Label htmlFor={name}>{label}</Label>
-      <select
+      <Select
         id={name}
         name={name}
-        className={selectControlClass}
         required
       >
         <option value="">Choose player</option>
@@ -357,7 +354,7 @@ function PlayerSelect({
             {displayPlayer(profile)} · {profile.rating ?? 1000}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }
@@ -428,15 +425,14 @@ function InviteResultForm({
       <div className="grid gap-3 sm:grid-cols-[1fr_0.9fr_auto] sm:items-end">
         <div className="grid gap-2">
           <Label htmlFor={resultId}>Winner</Label>
-          <select
+          <Select
             id={resultId}
             name="result"
-            className={selectControlClass}
             required
           >
             <option value="win">{currentPlayerLabel}</option>
             <option value="loss">{opponentLabel}</option>
-          </select>
+          </Select>
         </div>
         <div className="grid gap-2">
           <Label htmlFor={scoreId}>Score</Label>

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { submitDoublesMatchReport } from "@/app/protected/actions";
 
@@ -15,9 +16,6 @@ type DoublesTeamOption = {
   player_two_id: string;
   rating: number | null;
 };
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 function teamLabel(team: DoublesTeamOption) {
   return `${team.name} · ${team.rating ?? 1000}`;
@@ -59,12 +57,11 @@ export function DoublesMatchReportForm({
     <form action={submitDoublesMatchReport} className="grid gap-4">
       <input type="hidden" name="winner_team_id" value={winnerTeamId} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="team_one_id">Your team</Label>
-          <select
+          <Select
             id="team_one_id"
             name="team_one_id"
-            className={selectControlClass}
             value={teamOneId}
             onChange={(event) => {
               setTeamOneId(event.target.value);
@@ -79,14 +76,13 @@ export function DoublesMatchReportForm({
                 {teamLabel(team)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="team_two_id">Opponent team</Label>
-          <select
+          <Select
             id="team_two_id"
             name="team_two_id"
-            className={selectControlClass}
             value={teamTwoId}
             onChange={(event) => setTeamTwoId(event.target.value)}
             required
@@ -97,15 +93,14 @@ export function DoublesMatchReportForm({
                 {teamLabel(team)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-[1fr_0.6fr_0.6fr]">
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="winner_side">Winner</Label>
-          <select
+          <Select
             id="winner_side"
-            className={selectControlClass}
             value={winnerSide}
             onChange={(event) =>
               setWinnerSide(event.target.value as "team_one" | "team_two")
@@ -114,7 +109,7 @@ export function DoublesMatchReportForm({
           >
             <option value="team_one">Your team won</option>
             <option value="team_two">Opponent team won</option>
-          </select>
+          </Select>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="team_one_score">Your score</Label>

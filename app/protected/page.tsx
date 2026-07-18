@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import {
   avatarUrl,
   initialsAvatarColors,
@@ -158,9 +159,6 @@ function ratingBand(rating: number | null) {
 
   return "Rising";
 }
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 async function loadDashboardData(userId: string): Promise<DashboardData> {
   const supabase = await createClient();
@@ -401,15 +399,14 @@ async function Dashboard() {
               <PlayerSelect label="Opponent" name="opponent_id" profiles={rivals} />
               <div className="grid gap-2">
                 <Label htmlFor="result">Winner</Label>
-                <select
+                <Select
                   id="result"
                   name="result"
-                  className={selectControlClass}
                   required
                 >
                   <option value="win">I won</option>
                   <option value="loss">Opponent won</option>
-                </select>
+                </Select>
               </div>
               <Field label="Game score" name="score_summary" placeholder="11-7" />
               <SubmitButton
@@ -512,10 +509,9 @@ function PlayerSelect({
   return (
     <div className="grid gap-2">
       <Label htmlFor={name}>{label}</Label>
-      <select
+      <Select
         id={name}
         name={name}
-        className={selectControlClass}
         required
       >
         <option value="">Choose player</option>
@@ -524,7 +520,7 @@ function PlayerSelect({
             {displayPlayer(profile)} · {profile.rating ?? 1000}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

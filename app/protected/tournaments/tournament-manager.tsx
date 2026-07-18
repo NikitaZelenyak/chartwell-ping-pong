@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { APP_TIME_ZONE } from "@/lib/datetime";
 import { reportTournamentGame, updateTournamentGame } from "../actions";
 
@@ -51,9 +52,6 @@ export type TournamentManagerGame = {
   winner_id: string | null;
   status: string | null;
 };
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 function displayPlayer(profile?: TournamentManagerProfile) {
   if (!profile) {
@@ -506,10 +504,9 @@ function PlayerGameSelect({
   return (
     <div className="grid gap-2">
       <Label htmlFor={`${name}-${value ?? "empty"}`}>{label}</Label>
-      <select
+      <Select
         id={`${name}-${value ?? "empty"}`}
         name={name}
-        className={selectControlClass}
         defaultValue={value ?? ""}
         required
       >
@@ -519,7 +516,7 @@ function PlayerGameSelect({
             {displayPlayer(profile)}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

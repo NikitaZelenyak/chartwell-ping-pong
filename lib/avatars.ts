@@ -8,6 +8,8 @@ export type AvatarOption = {
 };
 
 export const INITIALS_AVATAR_STYLE = "player-initials";
+export const CUSTOM_PHOTO_AVATAR_STYLE = "custom-photo";
+export const CUSTOM_PHOTO_ACHIEVEMENT_MINIMUM = 16;
 
 export type AchievementRewardTier = "bronze" | "silver" | "gold" | "champion";
 export type AvatarProvider = "dicebear" | "robohash";
@@ -98,6 +100,19 @@ export function avatarUrl(style: string | null | undefined, seed: string | null 
     return "";
   }
 
+  if (isCustomPhotoAvatar(style)) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+    const path = seed
+      ?.split("/")
+      .filter(Boolean)
+      .map((part) => encodeURIComponent(part))
+      .join("/");
+
+    if (supabaseUrl && path) {
+      return `${supabaseUrl}/storage/v1/object/public/profile-photos/${path}`;
+    }
+  }
+
   const safeStyle = style && allowedStyles.has(style) ? style : "lorelei";
   const safeSeed = seed?.trim() || "chartwell-ping-pong";
 
@@ -170,6 +185,14 @@ export function findPlayerAvatarOption(
 
 export function isInitialsAvatar(style: string | null | undefined) {
   return style === INITIALS_AVATAR_STYLE;
+}
+
+export function isCustomPhotoAvatar(style: string | null | undefined) {
+  return style === CUSTOM_PHOTO_AVATAR_STYLE;
+}
+
+export function canUseCustomPhoto(achievementCount: number) {
+  return achievementCount >= CUSTOM_PHOTO_ACHIEVEMENT_MINIMUM;
 }
 
 export function initialsForName(name: string | null | undefined) {

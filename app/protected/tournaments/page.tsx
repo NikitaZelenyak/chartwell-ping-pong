@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import {
   avatarUrl,
   initialsAvatarColors,
@@ -64,9 +65,6 @@ type TournamentsData = {
   entries: TournamentEntry[];
   setupError: string | null;
 };
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -192,15 +190,14 @@ async function Tournaments() {
               <Field label="Start time" name="starts_at" type="datetime-local" />
               <div className="grid gap-2">
                 <Label htmlFor="format">Tournament format</Label>
-                <select
+                <Select
                   id="format"
                   name="format"
-                  className={selectControlClass}
                   defaultValue="single_elimination"
                 >
                   <option value="single_elimination">Knockout bracket</option>
                   <option value="round_robin">Round robin</option>
-                </select>
+                </Select>
                 <div className="rounded-md border border-primary/15 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
                   <p>
                     <span className="font-medium text-foreground">

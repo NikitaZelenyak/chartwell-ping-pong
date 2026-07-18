@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { AchievementKey } from "@/lib/achievements";
 import {
+  canUseCustomPhoto,
+  CUSTOM_PHOTO_AVATAR_STYLE,
   findPlayerAvatarOption,
+  isCustomPhotoAvatar,
   isAvatarUnlocked,
   safeAvatarSeed,
   safeAvatarStyle,
@@ -235,6 +238,24 @@ function cleanPlayerAvatarChoice(
   fallbackSeed: string,
 ) {
   const [style, rawSeed] = String(value ?? "").split("|");
+
+  if (isCustomPhotoAvatar(style)) {
+    const path = String(rawSeed ?? "").trim();
+
+    if (!canUseCustomPhoto(achievementCount)) {
+      throw new Error("A personal photo unlocks after 15 achievements.");
+    }
+
+    if (!path.startsWith(`${fallbackSeed}/`) || path.length > 120) {
+      throw new Error("Choose a valid personal photo.");
+    }
+
+    return {
+      avatar_style: CUSTOM_PHOTO_AVATAR_STYLE,
+      avatar_seed: path,
+    };
+  }
+
   const seed = safeAvatarSeed(rawSeed, fallbackSeed);
   const option = findPlayerAvatarOption(style, seed);
 
@@ -269,13 +290,25 @@ export async function syncMyAchievements() {
 
 export async function saveProfile(formData: FormData) {
   const { supabase, user } = await getCurrentUser();
-  const { count: achievementCount, error: achievementError } = await supabase
-    .from("profile_achievements")
-    .select("achievement_key", { count: "exact", head: true })
-    .eq("profile_id", user.id);
+  const [achievementResult, currentProfileResult] = await Promise.all([
+    supabase
+      .from("profile_achievements")
+      .select("achievement_key", { count: "exact", head: true })
+      .eq("profile_id", user.id),
+    supabase
+      .from("profiles")
+      .select("avatar_style,avatar_seed")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
+  const { count: achievementCount, error: achievementError } = achievementResult;
 
   if (achievementError) {
     throw new Error(achievementError.message);
+  }
+
+  if (currentProfileResult.error) {
+    throw new Error(currentProfileResult.error.message);
   }
 
   const avatar = cleanPlayerAvatarChoice(
@@ -301,9 +334,112 @@ export async function saveProfile(formData: FormData) {
     throw new Error(error.message);
   }
 
+  const previousAvatar = currentProfileResult.data;
+  if (
+    isCustomPhotoAvatar(previousAvatar?.avatar_style) &&
+    previousAvatar?.avatar_seed &&
+    previousAvatar.avatar_seed !== avatar.avatar_seed
+  ) {
+    await supabase.storage
+      .from("profile-photos")
+      .remove([previousAvatar.avatar_seed]);
+  }
+
   revalidatePath("/");
   revalidatePath("/protected");
   revalidatePath("/protected/profile");
+  revalidatePath(`/protected/players/${user.id}`);
+}
+
+export async function uploadProfilePhoto(formData: FormData) {
+  const { supabase, user } = await getCurrentUser();
+  const photo = formData.get("profile_photo");
+
+  if (!(photo instanceof File) || photo.size === 0) {
+    throw new Error("Choose a photo to upload.");
+  }
+
+  const allowedTypes: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+  };
+  const extension = allowedTypes[photo.type];
+
+  if (!extension) {
+    throw new Error("Use a JPG, PNG, or WebP image.");
+  }
+
+  if (photo.size > 5 * 1024 * 1024) {
+    throw new Error("Your photo must be 5 MB or smaller.");
+  }
+
+  const [achievementResult, profileResult] = await Promise.all([
+    supabase
+      .from("profile_achievements")
+      .select("achievement_key", { count: "exact", head: true })
+      .eq("profile_id", user.id),
+    supabase
+      .from("profiles")
+      .select("avatar_style,avatar_seed")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
+
+  if (achievementResult.error) {
+    throw new Error(achievementResult.error.message);
+  }
+
+  if (!canUseCustomPhoto(achievementResult.count ?? 0)) {
+    throw new Error("A personal photo unlocks after 15 achievements.");
+  }
+
+  if (profileResult.error) {
+    throw new Error(profileResult.error.message);
+  }
+
+  const photoPath = `${user.id}/${crypto.randomUUID()}.${extension}`;
+  const { error: uploadError } = await supabase.storage
+    .from("profile-photos")
+    .upload(photoPath, await photo.arrayBuffer(), {
+      cacheControl: "31536000",
+      contentType: photo.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw new Error(uploadError.message);
+  }
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({
+      avatar_style: CUSTOM_PHOTO_AVATAR_STYLE,
+      avatar_seed: photoPath,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (updateError) {
+    await supabase.storage.from("profile-photos").remove([photoPath]);
+    throw new Error(updateError.message);
+  }
+
+  const previousAvatar = profileResult.data;
+  if (
+    isCustomPhotoAvatar(previousAvatar?.avatar_style) &&
+    previousAvatar?.avatar_seed &&
+    previousAvatar.avatar_seed !== photoPath
+  ) {
+    await supabase.storage
+      .from("profile-photos")
+      .remove([previousAvatar.avatar_seed]);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/protected");
+  revalidatePath("/protected/profile");
+  revalidatePath(`/protected/players/${user.id}`);
 }
 
 export async function createTournament(formData: FormData) {

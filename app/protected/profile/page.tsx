@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
+  Camera,
   Check,
   Crown,
   LockKeyhole,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { AchievementsPanel } from "@/components/achievements-panel";
+import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { PingPongLoader } from "@/components/ping-pong-loader";
@@ -23,13 +25,17 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   achievementRewardTier,
   avatarUrl,
+  canUseCustomPhoto,
+  CUSTOM_PHOTO_AVATAR_STYLE,
   initialsAvatarColors,
   initialsForName,
   isAvatarUnlocked,
+  isCustomPhotoAvatar,
   isInitialsAvatar,
   playerAvatarOptions,
   type AchievementRewardTier,
@@ -58,9 +64,6 @@ type EarnedAchievement = {
   achievement_key: string;
   awarded_at: string | null;
 };
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 function displayPlayer(profile?: Profile | null, fallback = "Player") {
   if (!profile) {
@@ -145,6 +148,9 @@ async function ProfileContent() {
   ]);
   const playerName = displayPlayer(profile, user.email ?? "Player");
   const achievementCount = achievements.length;
+  const currentPhotoUrl = isCustomPhotoAvatar(profile?.avatar_style)
+    ? avatarUrl(profile?.avatar_style, profile?.avatar_seed)
+    : null;
 
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6">
@@ -201,17 +207,16 @@ async function ProfileContent() {
             />
             <div className="grid gap-2">
               <Label htmlFor="preferred_hand">Preferred hand</Label>
-              <select
+              <Select
                 id="preferred_hand"
                 name="preferred_hand"
                 defaultValue={profile?.preferred_hand ?? ""}
-                className={selectControlClass}
               >
                 <option value="">Choose</option>
                 <option value="right">Right</option>
                 <option value="left">Left</option>
                 <option value="ambidextrous">Ambidextrous</option>
-              </select>
+              </Select>
             </div>
             <AvatarPicker
               label="Avatar"
@@ -241,6 +246,11 @@ async function ProfileContent() {
           </form>
         </CardContent>
       </Card>
+
+      <ProfilePhotoUpload
+        achievementCount={achievementCount}
+        currentPhotoUrl={currentPhotoUrl}
+      />
 
       <Card className="rounded-md shadow-sm">
         <CardContent className="pt-6">
@@ -371,14 +381,16 @@ function AvatarPicker({
   achievementCount: number;
   className?: string;
 }) {
-  const selectedIndex = Math.max(
-    0,
-    options.findIndex((option) =>
-      isInitialsAvatar(option.style)
-        ? option.style === selectedStyle
-        : option.style === selectedStyle && option.seed === selectedSeed,
-    ),
+  const customPhotoSelected =
+    canUseCustomPhoto(achievementCount) &&
+    isCustomPhotoAvatar(selectedStyle) &&
+    Boolean(selectedSeed);
+  const matchedIndex = options.findIndex((option) =>
+    isInitialsAvatar(option.style)
+      ? option.style === selectedStyle
+      : option.style === selectedStyle && option.seed === selectedSeed,
   );
+  const selectedIndex = customPhotoSelected ? -1 : Math.max(0, matchedIndex);
 
   return (
     <div className={`grid gap-2 ${className ?? ""}`}>
@@ -387,6 +399,33 @@ function AvatarPicker({
         <Badge variant="secondary">{achievementCount} achievements</Badge>
       </div>
       <div className="grid max-h-[28rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-6">
+        {customPhotoSelected ? (
+          <label className="group cursor-pointer rounded-md border bg-background p-2 shadow-sm transition has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:ring-1 has-[:checked]:ring-primary hover:border-primary/60">
+            <input
+              className="sr-only"
+              defaultChecked
+              name="avatar_choice"
+              type="radio"
+              value={`${CUSTOM_PHOTO_AVATAR_STYLE}|${selectedSeed}`}
+            />
+            <div className="relative">
+              <AvatarThumb
+                styleName={CUSTOM_PHOTO_AVATAR_STYLE}
+                seed={selectedSeed}
+                label="Your photo"
+                className="aspect-square w-full"
+                achievementCount={achievementCount}
+              />
+            </div>
+            <span className="mt-2 block truncate text-center text-xs font-medium">
+              Your photo
+            </span>
+            <span className="mt-1 flex items-center justify-center gap-1 rounded-sm bg-primary/10 px-1.5 py-1 text-center text-[0.65rem] font-medium text-primary">
+              <Camera className="size-3" />
+              Personal
+            </span>
+          </label>
+        ) : null}
         {options.map((option, index) => {
           const optionSeed = isInitialsAvatar(option.style)
             ? initialsSeed

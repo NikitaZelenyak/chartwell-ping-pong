@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { PingPongLoader } from "@/components/ping-pong-loader";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -83,9 +84,6 @@ type DoublesData = {
   reports: DoublesMatchReport[];
   setupError: string | null;
 };
-
-const selectControlClass =
-  "h-11 rounded-md border border-input bg-background px-3 text-base shadow-sm md:h-9 md:text-sm";
 
 function displayPlayer(profile?: Profile | null) {
   return profile?.display_name || profile?.email || "Player";
@@ -233,10 +231,9 @@ async function DoublesContent() {
             <form action={createDoublesTeamInvite} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="partner_id">Partner</Label>
-                <select
+                <Select
                   id="partner_id"
                   name="partner_id"
-                  className={selectControlClass}
                   required
                 >
                   <option value="">Choose partner</option>
@@ -245,7 +242,7 @@ async function DoublesContent() {
                       {displayPlayer(profile)} · {profile.rating ?? 1000}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
               <Field
                 label="Team name"
