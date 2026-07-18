@@ -5,6 +5,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   Menu,
+  MessagesSquare,
   Swords,
   Trophy,
   UserRound,
@@ -31,6 +32,12 @@ const links = [
     label: "Profile",
     description: "Your player card and achievements",
     icon: UserRound,
+  },
+  {
+    href: "/protected/posts",
+    label: "Posts",
+    description: "Videos, thoughts, and discussion",
+    icon: MessagesSquare,
   },
   {
     href: "/protected/doubles",
