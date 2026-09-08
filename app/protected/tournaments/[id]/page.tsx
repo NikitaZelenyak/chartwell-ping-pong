@@ -1,3 +1,5 @@
+import { getSeasons } from "@/lib/seasons-server";
+import { isAppAdmin } from "@/lib/admin-server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -47,6 +49,7 @@ type Tournament = TournamentManagerTournament & {
   skill_floor: number | null;
   skill_ceiling: number | null;
   organizer_id: string;
+  season_id: string;
 };
 
 type TournamentDetailData = {
@@ -84,7 +87,7 @@ async function loadTournamentDetail(id: string): Promise<TournamentDetailData> {
       supabase
         .from("tournaments")
         .select(
-          "id,name,venue,starts_at,max_players,skill_floor,skill_ceiling,status,organizer_id,format",
+          "id,name,venue,starts_at,max_players,skill_floor,skill_ceiling,status,organizer_id,season_id,format",
         )
         .eq("id", id)
         .maybeSingle(),
@@ -156,7 +159,10 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
     notFound();
   }
 
-  const isOrganizer = data.tournament.organizer_id === user.id;
+  const seasons = await getSeasons();
+  const tournamentSeason = seasons.find(s => s.id === data.tournament?.season_id);
+  const isCurrentSeason = tournamentSeason?.status === "active";
+  const isOrganizer = data.tournament.organizer_id === user.id || await isAppAdmin();
   const isParticipant = data.entries.some((entry) => entry.user_id === user.id);
   const playerCount = data.entries.length;
   const requiredPlayers = data.tournament.max_players ?? 2;
@@ -183,7 +189,8 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
         </div>
       ) : null}
 
-      <section className="rounded-md border bg-card p-5 shadow-sm">
+      {!isCurrentSeason && <p className="rounded-xl border bg-muted/60 p-4 text-sm text-muted-foreground">This tournament belongs to an archived season. Its rated results are frozen. Create a new tournament to play in the current season.</p>}
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap gap-2">
@@ -191,7 +198,8 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
                 {formatTournamentFormat(data.tournament.format)}
               </Badge>
               <Badge variant="outline">{data.tournament.status}</Badge>
-              {isOrganizer ? <Badge variant="secondary">Creator</Badge> : null}
+              {isOrganizer ? <Badge variant="secondary">Manager</Badge> : null}
+              <Badge variant="outline">{tournamentSeason?.name ?? "Previous season"}</Badge>
               {isParticipant ? <Badge variant="secondary">Participant</Badge> : null}
             </div>
             <h1 className="mt-4 break-words text-3xl font-semibold tracking-normal">
@@ -217,7 +225,7 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
           </div>
 
           <div className="grid gap-2 sm:min-w-44">
-            {!isParticipant &&
+            {isCurrentSeason && !isParticipant &&
             !isOrganizer &&
             data.tournament.status === "open" &&
             !isFull ? (
@@ -228,13 +236,13 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
                 </SubmitButton>
               </form>
             ) : null}
-            {!isParticipant &&
+            {isCurrentSeason && !isParticipant &&
             !isOrganizer &&
             data.tournament.status === "open" &&
             isFull ? (
               <Badge variant="outline">Tournament full</Badge>
             ) : null}
-            {isOrganizer && data.tournament.status === "open" ? (
+            {isCurrentSeason && isOrganizer && data.tournament.status === "open" ? (
               <div className="grid gap-1">
                 <form action={startTournament}>
                   <input type="hidden" name="tournament_id" value={data.tournament.id} />
@@ -260,7 +268,7 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
       </section>
 
       {isOrganizer ? (
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Settings className="size-5" />
@@ -343,14 +351,14 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
 
       {canViewManager ? (
         <TournamentManager
-          editable={isOrganizer}
+          editable={isOrganizer && isCurrentSeason}
           entries={data.entries}
           games={data.games}
           profiles={data.profiles}
           tournament={data.tournament}
         />
       ) : (
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">Join to view match board</CardTitle>
             <CardDescription>

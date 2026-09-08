@@ -1,5 +1,6 @@
 "use server";
 
+import { isAppAdmin } from "@/lib/admin-server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -75,7 +76,7 @@ async function evaluateProfileAchievements(
 ) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id,rating,wins,losses,doubles_wins,doubles_losses")
+    .select("id,rating,lifetime_wins,lifetime_losses,lifetime_doubles_wins,lifetime_doubles_losses")
     .eq("id", profileId)
     .maybeSingle();
 
@@ -83,8 +84,8 @@ async function evaluateProfileAchievements(
     return;
   }
 
-  const totalWins = profile.wins ?? 0;
-  const totalMatches = totalWins + (profile.losses ?? 0);
+  const totalWins = profile.lifetime_wins ?? 0;
+  const totalMatches = totalWins + (profile.lifetime_losses ?? 0);
 
   if (totalWins >= 1) {
     await awardAchievement(supabase, profileId, "first_win", source?.type, source?.id);
@@ -122,7 +123,12 @@ async function evaluateProfileAchievements(
   const { data: topSingles } = await supabase
     .from("profiles")
     .select("id")
+    .gt("wins", 0)
     .order("rating", { ascending: false })
+      .order("wins", { ascending: false })
+      .order("losses", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
     .limit(1)
     .maybeSingle();
 
@@ -132,7 +138,7 @@ async function evaluateProfileAchievements(
 
   const { data: myTeams } = await supabase
     .from("doubles_teams")
-    .select("id,created_by,rating,wins")
+    .select("id,created_by,rating,lifetime_wins")
     .or(`player_one_id.eq.${profileId},player_two_id.eq.${profileId}`);
 
   if (myTeams?.length) {
@@ -143,7 +149,7 @@ async function evaluateProfileAchievements(
     await awardAchievement(supabase, profileId, "team_builder", "doubles_team", profileId);
   }
 
-  const tenWinTeam = (myTeams ?? []).find((team) => (team.wins ?? 0) >= 10);
+  const tenWinTeam = (myTeams ?? []).find((team) => (team.lifetime_wins ?? 0) >= 10);
   if (tenWinTeam) {
     await awardAchievement(supabase, profileId, "trusted_partner", "doubles_team", tenWinTeam.id);
     await awardAchievement(supabase, profileId, "perfect_partner", "doubles_team", tenWinTeam.id);
@@ -152,7 +158,12 @@ async function evaluateProfileAchievements(
   const { data: topDoubles } = await supabase
     .from("doubles_teams")
     .select("id,player_one_id,player_two_id")
+    .gt("wins", 0)
     .order("rating", { ascending: false })
+      .order("wins", { ascending: false })
+      .order("losses", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
     .limit(1)
     .maybeSingle();
 
@@ -317,18 +328,15 @@ export async function saveProfile(formData: FormData) {
     user.id,
   );
 
-  const { error } = await supabase.from("profiles").upsert(
+  const { error } = await supabase.from("profiles").update(
     {
-      id: user.id,
-      email: user.email,
       display_name: cleanString(formData.get("display_name")),
       preferred_hand: cleanString(formData.get("preferred_hand")),
       ...avatar,
       bio: cleanString(formData.get("bio")),
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "id" },
-  );
+  ).eq("id", user.id);
 
   if (error) {
     throw new Error(error.message);
@@ -493,7 +501,7 @@ export async function updateTournamentSettings(formData: FormData) {
     throw new Error(tournamentError?.message ?? "Tournament not found.");
   }
 
-  if (tournament.organizer_id !== user.id) {
+  if (tournament.organizer_id !== user.id && !await isAppAdmin()) {
     throw new Error("Only the organizer can update this tournament.");
   }
 
@@ -527,8 +535,7 @@ export async function updateTournamentSettings(formData: FormData) {
       starts_at: dateTimeLocalToIso(cleanString(formData.get("starts_at"))),
       max_players: maxPlayers,
     })
-    .eq("id", tournamentId)
-    .eq("organizer_id", user.id);
+    .eq("id", tournamentId);
 
   if (error) {
     throw new Error(error.message);
@@ -540,7 +547,7 @@ export async function updateTournamentSettings(formData: FormData) {
 }
 
 export async function deleteTournament(formData: FormData) {
-  const { supabase, user } = await getCurrentUser();
+  const { supabase } = await getCurrentUser();
   const tournamentId = cleanString(formData.get("tournament_id"));
 
   if (!tournamentId) {
@@ -550,8 +557,7 @@ export async function deleteTournament(formData: FormData) {
   const { error } = await supabase
     .from("tournaments")
     .delete()
-    .eq("id", tournamentId)
-    .eq("organizer_id", user.id);
+    .eq("id", tournamentId);
 
   if (error) {
     throw new Error(error.message);
@@ -677,7 +683,7 @@ export async function startTournament(formData: FormData) {
     throw new Error(tournamentError?.message ?? "Tournament not found.");
   }
 
-  if (tournament.organizer_id !== user.id) {
+  if (tournament.organizer_id !== user.id && !await isAppAdmin()) {
     throw new Error("Only the organizer can start this tournament.");
   }
 
@@ -725,8 +731,7 @@ export async function startTournament(formData: FormData) {
   const { error: updateError } = await supabase
     .from("tournaments")
     .update({ status: "running" })
-    .eq("id", tournamentId)
-    .eq("organizer_id", user.id);
+    .eq("id", tournamentId);
 
   if (updateError) {
     throw new Error(updateError.message);
@@ -761,7 +766,7 @@ export async function updateTournamentGame(formData: FormData) {
     ? game.tournaments[0]
     : game.tournaments;
 
-  if (tournament?.organizer_id !== user.id) {
+  if (tournament?.organizer_id !== user.id && !await isAppAdmin()) {
     throw new Error("Only the organizer can edit games.");
   }
 
@@ -809,7 +814,7 @@ export async function reportTournamentGame(formData: FormData) {
     ? game.tournaments[0]
     : game.tournaments;
 
-  if (tournament?.organizer_id !== user.id) {
+  if (tournament?.organizer_id !== user.id && !await isAppAdmin()) {
     throw new Error("Only the organizer can report tournament games.");
   }
 
@@ -1116,7 +1121,10 @@ export async function submitCasualMatchReport(formData: FormData) {
   const playerOneScore = result === "win" ? 1 : 0;
   const playerTwoScore = result === "win" ? 0 : 1;
 
+  const seasonId = cleanString(formData.get("season_id"));
+  if (!seasonId) throw new Error("Refresh the page to report a match in the current season.");
   const { error } = await supabase.from("match_reports").insert({
+    season_id: seasonId,
     reporter_id: user.id,
     opponent_id: opponentId,
     invite_id: inviteId,
@@ -1191,8 +1199,6 @@ export async function declineMatchReport(formData: FormData) {
     .from("match_reports")
     .update({
       status: "declined",
-      responded_by: user.id,
-      responded_at: new Date().toISOString(),
     })
     .eq("id", reportId)
     .eq("opponent_id", user.id)
@@ -1428,7 +1434,10 @@ export async function submitDoublesMatchReport(formData: FormData) {
 
   const responderTeamId = reporterTeamId === teamOneId ? teamTwoId : teamOneId;
 
+  const seasonId = cleanString(formData.get("season_id"));
+  if (!seasonId) throw new Error("Refresh the page to report a match in the current season.");
   const { error } = await supabase.from("doubles_match_reports").insert({
+    season_id: seasonId,
     reporter_id: user.id,
     team_one_id: teamOneId,
     team_two_id: teamTwoId,
@@ -1535,8 +1544,6 @@ export async function declineDoublesMatchReport(formData: FormData) {
     .from("doubles_match_reports")
     .update({
       status: "declined",
-      responded_by: user.id,
-      responded_at: new Date().toISOString(),
     })
     .eq("id", reportId);
 

@@ -2,6 +2,8 @@
 
 import {
   BookOpen,
+  Leaf,
+  ShieldCheck,
   ChevronRight,
   LayoutDashboard,
   Menu,
@@ -20,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const links = [
+  { href: "/protected/seasons", label: "Seasons", description: "Standings, champions, and every past rally", icon: Leaf },
   {
     href: "/protected",
     label: "Dashboard",
@@ -59,7 +62,8 @@ const links = [
   },
 ];
 
-export function ProtectedNavLinks() {
+export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
+  const navigationLinks = isAdmin ? [...links, { href: "/protected/admin", label: "Admin", description: "Your private league controls", icon: ShieldCheck, exact: false }] : links;
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -90,8 +94,8 @@ export function ProtectedNavLinks() {
 
   return (
     <>
-      <div className="hidden items-center gap-1 text-xs font-medium text-muted-foreground md:flex">
-        {links.map((link) => (
+      <div className="hidden items-center gap-1 text-xs font-medium text-muted-foreground xl:flex">
+        {navigationLinks.map((link) => (
           <NavLink
             href={link.href}
             key={link.href}
@@ -102,7 +106,7 @@ export function ProtectedNavLinks() {
         ))}
       </div>
 
-      <div className="md:hidden">
+      <div className="xl:hidden">
         <Button
           aria-controls="mobile-navigation"
           aria-expanded={open}
@@ -118,7 +122,7 @@ export function ProtectedNavLinks() {
       </div>
 
       {open ? (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 xl:hidden">
           <button
             aria-label="Close navigation menu"
             className="absolute inset-0 bg-foreground/35 backdrop-blur-[2px]"
@@ -151,7 +155,7 @@ export function ProtectedNavLinks() {
             </div>
 
             <nav aria-label="Player navigation" className="mt-3 grid gap-1.5">
-              {links.map((link) => {
+              {navigationLinks.map((link) => {
                 const active = link.exact
                   ? pathname === link.href
                   : pathname.startsWith(link.href);

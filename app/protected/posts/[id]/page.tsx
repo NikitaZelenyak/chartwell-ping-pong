@@ -109,7 +109,7 @@ async function PostDetailContent({
         post={post}
       />
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <MessageCircle className="size-5" />

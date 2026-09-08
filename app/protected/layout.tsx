@@ -1,3 +1,5 @@
+import { isAppAdmin } from "@/lib/admin-server";
+import { SeasonBanner } from "@/components/season-banner";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { PinPongMark } from "@/components/pinpong-mark";
@@ -13,7 +15,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="court-stripes flex min-h-screen flex-col items-center">
+    <main className="season-shell court-stripes flex min-h-screen flex-col items-center">
       <div className="flex w-full flex-1 flex-col items-center gap-5 sm:gap-8">
         <nav className="sticky top-0 z-40 flex min-h-16 w-full justify-center border-b border-b-primary/15 bg-background/90 shadow-sm shadow-primary/5 backdrop-blur-lg">
           <div className="flex w-full max-w-6xl items-center justify-between gap-2 px-3 py-2.5 text-sm sm:px-5">
@@ -26,7 +28,7 @@ export default function ProtectedLayout({
                 <span className="truncate min-[390px]:hidden">PinPong</span>
               </Link>
               <Suspense fallback={null}>
-                <ProtectedNavLinks />
+                <AdminNavigation />
               </Suspense>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -41,7 +43,8 @@ export default function ProtectedLayout({
             </div>
           </div>
         </nav>
-        <div className="flex w-full max-w-6xl flex-1 flex-col px-3 py-2 sm:px-5 sm:py-4">
+        <div className="season-content flex w-full max-w-6xl flex-1 flex-col px-3 py-2 sm:px-5 sm:py-4">
+          <Suspense fallback={null}><SeasonBanner /></Suspense>
           {children}
         </div>
 
@@ -51,4 +54,8 @@ export default function ProtectedLayout({
       </div>
     </main>
   );
+}
+
+async function AdminNavigation() {
+  return <ProtectedNavLinks isAdmin={await isAppAdmin()} />;
 }

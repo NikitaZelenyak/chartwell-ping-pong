@@ -69,7 +69,7 @@ async function PostsContent({
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6 sm:gap-8">
-      <section className="overflow-hidden rounded-md border bg-card shadow-sm">
+      <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
         <div className="relative p-4 sm:p-6">
           <div
             aria-hidden="true"
@@ -98,7 +98,7 @@ async function PostsContent({
         </div>
       ) : null}
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <MessagesSquare className="size-5" />
@@ -136,7 +136,7 @@ async function PostsContent({
       {(page > 1 || hasNext) && !setupError ? (
         <nav
           aria-label="Posts pagination"
-          className="flex items-center justify-between gap-3 rounded-md border bg-card p-3"
+          className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-3"
         >
           {page > 1 ? (
             <Button asChild variant="outline">

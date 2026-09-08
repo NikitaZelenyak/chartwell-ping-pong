@@ -52,6 +52,10 @@ type Profile = {
   rating: number | null;
   wins: number | null;
   losses: number | null;
+  lifetime_wins: number;
+  lifetime_losses: number;
+  lifetime_doubles_wins: number;
+  lifetime_doubles_losses: number;
   doubles_wins: number | null;
   doubles_losses: number | null;
   preferred_hand: string | null;
@@ -96,7 +100,7 @@ async function loadProfile(userId: string) {
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id,email,display_name,rating,wins,losses,doubles_wins,doubles_losses,preferred_hand,avatar_style,avatar_seed,bio",
+      "id,email,display_name,rating,wins,losses,doubles_wins,doubles_losses,lifetime_wins,lifetime_losses,lifetime_doubles_wins,lifetime_doubles_losses,preferred_hand,avatar_style,avatar_seed,bio",
     )
     .eq("id", userId)
     .maybeSingle();
@@ -154,7 +158,7 @@ async function ProfileContent() {
 
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6">
-      <section className="rounded-md border bg-card p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <AvatarThumb
@@ -179,15 +183,17 @@ async function ProfileContent() {
           <Badge variant="secondary">{ratingBand(profile?.rating ?? null)}</Badge>
         </div>
         <div className="mt-5 grid grid-cols-2 gap-2 text-sm sm:mt-6 sm:grid-cols-5 sm:gap-3">
-          <ProfileStat label="Rating" value={profile?.rating ?? 1000} />
-          <ProfileStat label="Wins" value={profile?.wins ?? 0} />
-          <ProfileStat label="Losses" value={profile?.losses ?? 0} />
-          <ProfileStat label="Doubles wins" value={profile?.doubles_wins ?? 0} />
-          <ProfileStat label="Doubles losses" value={profile?.doubles_losses ?? 0} />
+          <ProfileStat label="Season rating" value={profile?.rating ?? 1000} />
+          <ProfileStat label="Lifetime wins" value={profile?.lifetime_wins ?? 0} />
+          <ProfileStat label="Lifetime losses" value={profile?.lifetime_losses ?? 0} />
+          <ProfileStat label="Season wins" value={profile?.wins ?? 0} />
+          <ProfileStat label="Season losses" value={profile?.losses ?? 0} />
+          <ProfileStat label="Lifetime doubles W" value={profile?.lifetime_doubles_wins ?? 0} />
+          <ProfileStat label="Lifetime doubles L" value={profile?.lifetime_doubles_losses ?? 0} />
         </div>
       </section>
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <UserRound className="size-5" />
@@ -252,7 +258,7 @@ async function ProfileContent() {
         currentPhotoUrl={currentPhotoUrl}
       />
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardContent className="pt-6">
           <AchievementsPanel achievements={achievements} />
           <div className="mt-5 flex flex-col gap-3 rounded-md border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -69,7 +70,7 @@ async function GuideContent() {
 
   return (
     <div className="w-full space-y-6 sm:space-y-10">
-      <section className="rounded-md border bg-card p-5 shadow-sm">
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
           How it works
         </Badge>
@@ -80,6 +81,14 @@ async function GuideContent() {
           Use this page as the operating manual for profiles, ratings, doubles,
           tournament formats, and match results.
         </p>
+      </section>
+
+      <section className="season-panel p-5 sm:p-7">
+        <h2 className="text-xl font-semibold">A new season, a fresh start</h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">Seasons last three calendar months in America/Toronto. Players and doubles teams begin each season at 1,000 rating, with zero wins and losses. Your lifetime record and unlocked achievements carry forward.</p>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">Report only games played in the current season, and confirm them before it closes. Unconfirmed reports expire at the boundary and remain in the archive; they cannot change the next season’s ratings. Tournaments belong to the season in which they were created.</p>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">Final tables are ordered by rating, wins, fewer losses, join date, and ID. The highest-ranked player and team with a win become the season champions. A season with no wins has no champion.</p>
+        <Link href="/protected/seasons" className="mt-4 inline-flex text-sm font-semibold text-primary hover:underline">Visit the season center →</Link>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -101,7 +110,7 @@ async function GuideContent() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1fr]">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <CircleGauge className="size-5" />
@@ -139,7 +148,7 @@ rating_delta = max(1, round(32 * (1 - expected)))`}
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Trophy className="size-5" />
@@ -172,7 +181,7 @@ rating_delta = max(1, round(32 * (1 - expected)))`}
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <UsersRound className="size-5" />
@@ -226,7 +235,7 @@ player_delta = max(1, round(32 * (1 - expected_from_player_averages)))`}
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Swords className="size-5" />
@@ -245,7 +254,7 @@ player_delta = max(1, round(32 * (1 - expected_from_player_averages)))`}
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Medal className="size-5" />
@@ -268,7 +277,7 @@ player_delta = max(1, round(32 * (1 - expected_from_player_averages)))`}
       </section>
 
       <section>
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Medal className="size-5" />
@@ -305,7 +314,7 @@ function WorkflowCard({
   text: string;
 }) {
   return (
-    <Card className="rounded-md shadow-sm">
+    <Card className="rounded-2xl shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="text-primary">{icon}</span>

@@ -24,7 +24,9 @@ function teamLabel(team: DoublesTeamOption) {
 export function DoublesMatchReportForm({
   myTeams,
   teams,
+  seasonId,
 }: {
+  seasonId: string;
   myTeams: DoublesTeamOption[];
   teams: DoublesTeamOption[];
 }) {
@@ -55,6 +57,7 @@ export function DoublesMatchReportForm({
 
   return (
     <form action={submitDoublesMatchReport} className="grid gap-4">
+      <input type="hidden" name="season_id" value={seasonId} />
       <input type="hidden" name="winner_team_id" value={winnerTeamId} />
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid min-w-0 gap-2">

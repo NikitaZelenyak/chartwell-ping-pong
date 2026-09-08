@@ -1,3 +1,5 @@
+import { getSeasons } from "@/lib/seasons-server";
+import { isAppAdmin } from "@/lib/admin-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -49,6 +51,7 @@ type Tournament = {
   skill_ceiling: number | null;
   status: string | null;
   organizer_id: string;
+  season_id: string;
   avatar_style: string | null;
   avatar_seed: string | null;
   format: string | null;
@@ -93,7 +96,7 @@ async function loadTournamentsData(): Promise<TournamentsData> {
       supabase
         .from("tournaments")
         .select(
-          "id,name,venue,starts_at,max_players,skill_floor,skill_ceiling,status,organizer_id,avatar_style,avatar_seed,format",
+          "id,name,venue,starts_at,max_players,skill_floor,skill_ceiling,status,organizer_id,season_id,avatar_style,avatar_seed,format",
         )
         .order("starts_at", { ascending: true, nullsFirst: false }),
       supabase
@@ -136,6 +139,9 @@ async function Tournaments() {
     redirect("/auth/login");
   }
 
+  const seasons = await getSeasons();
+  const activeSeason = seasons.find(s => s.status === "active");
+  const isAdmin = await isAppAdmin();
   const data = await loadTournamentsData();
   const myEntries = new Set(
     data.entries
@@ -158,7 +164,7 @@ async function Tournaments() {
         </div>
       ) : null}
 
-      <section className="rounded-md border bg-card p-5 shadow-sm">
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
           Tournament desk
         </Badge>
@@ -172,7 +178,7 @@ async function Tournaments() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1fr]">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Trophy className="size-5" />
@@ -234,7 +240,7 @@ async function Tournaments() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <CalendarDays className="size-5" />
@@ -250,6 +256,7 @@ async function Tournaments() {
                 (entry) => entry.tournament_id === tournament.id,
               ).length;
               const joined = myEntries.has(tournament.id);
+              const isCurrentSeason = tournament.season_id === activeSeason?.id;
               const requiredPlayers = tournament.max_players ?? 2;
               const canStart = playerCount >= requiredPlayers;
               const isFull = playerCount >= requiredPlayers;
@@ -273,6 +280,7 @@ async function Tournaments() {
                         />
                         <div className="min-w-0">
                           <h3 className="break-words font-semibold">{tournament.name}</h3>
+                          <p className="mt-1 text-xs font-medium text-primary">{seasons.find(s => s.id === tournament.season_id)?.name ?? "Previous season"}{!isCurrentSeason ? " · Ratings closed" : ""}</p>
                           <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="size-4" />
                             {tournament.venue || "Venue to be announced"}
@@ -299,7 +307,7 @@ async function Tournaments() {
                     </p>
                   </Link>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    {!joined && tournament.status === "open" && !isFull ? (
+                    {isCurrentSeason && !joined && tournament.status === "open" && !isFull ? (
                       <form action={joinTournament}>
                         <input type="hidden" name="tournament_id" value={tournament.id} />
                         <SubmitButton pendingLabel="Joining…" size="sm" variant="outline" className="w-full sm:w-auto">
@@ -307,10 +315,10 @@ async function Tournaments() {
                         </SubmitButton>
                       </form>
                     ) : null}
-                    {!joined && tournament.status === "open" && isFull ? (
+                    {isCurrentSeason && !joined && tournament.status === "open" && isFull ? (
                       <Badge variant="outline">Full</Badge>
                     ) : null}
-                    {tournament.organizer_id === user.id && tournament.status === "open" ? (
+                    {isCurrentSeason && (tournament.organizer_id === user.id || isAdmin) && tournament.status === "open" ? (
                       <div className="grid gap-1">
                         <form action={startTournament}>
                           <input type="hidden" name="tournament_id" value={tournament.id} />
@@ -331,7 +339,7 @@ async function Tournaments() {
                         ) : null}
                       </div>
                     ) : null}
-                    {tournament.organizer_id === user.id ? (
+                    {(tournament.organizer_id === user.id || isAdmin) ? (
                       <form action={deleteTournament}>
                         <input type="hidden" name="tournament_id" value={tournament.id} />
                         <SubmitButton

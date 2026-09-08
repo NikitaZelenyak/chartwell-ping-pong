@@ -1,3 +1,5 @@
+import { SeasonInput } from "@/components/season-banner";
+import { getActiveSeason } from "@/lib/seasons-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -163,6 +165,7 @@ function ratingBand(rating: number | null) {
 async function loadDashboardData(userId: string): Promise<DashboardData> {
   const supabase = await createClient();
   const setupErrors: string[] = [];
+  const season = await getActiveSeason();
 
   const [
     profilesResult,
@@ -177,7 +180,11 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
       .select(
         "id,email,display_name,rating,wins,losses,preferred_hand,avatar_style,avatar_seed,bio",
       )
-      .order("rating", { ascending: false }),
+      .order("rating", { ascending: false })
+      .order("wins", { ascending: false })
+      .order("losses", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true }),
     supabase
       .from("tournaments")
       .select(
@@ -199,6 +206,7 @@ async function loadDashboardData(userId: string): Promise<DashboardData> {
       .select(
         "id,player_one_id,player_two_id,winner_id,loser_id,player_one_score,player_two_score,score_summary,rating_delta,tournament_id,created_at",
       )
+      .eq("season_id", season?.id ?? "00000000-0000-0000-0000-000000000000")
       .order("created_at", { ascending: false })
       .limit(50),
     supabase
@@ -294,7 +302,7 @@ async function Dashboard() {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-md border bg-card p-4 sm:p-5 md:col-span-2">
+        <div className="rounded-2xl border bg-card p-4 sm:p-5 md:col-span-2">
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:gap-4">
             <div className="flex min-w-0 items-center gap-3">
               <AvatarThumb
@@ -304,7 +312,7 @@ async function Dashboard() {
                 className="size-16"
               />
               <div className="min-w-0">
-                <p className="text-sm text-muted-foreground">Player profile</p>
+                <p className="text-sm text-muted-foreground">Your season at a glance</p>
                 <h1 className="mt-2 break-words text-2xl font-semibold tracking-normal sm:text-3xl">
                   {displayPlayer(myProfile) || user.email}
                 </h1>
@@ -314,7 +322,7 @@ async function Dashboard() {
           </div>
           <div className="mt-5 grid grid-cols-3 gap-2 text-sm sm:mt-6 sm:gap-3">
             <div>
-              <p className="text-muted-foreground">Rating</p>
+              <p className="text-muted-foreground">Season rating</p>
               <p className="mt-1 text-xl font-semibold sm:text-2xl">
                 {myProfile?.rating ?? 1000}
               </p>
@@ -349,23 +357,24 @@ async function Dashboard() {
       </section>
 
       <section>
-        <Card id="leaderboard" className="rounded-md shadow-sm">
+        <Card id="leaderboard" className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <CircleGauge className="size-5" />
-              Leaderboard
+              Current season standings
             </CardTitle>
             <CardDescription>
-              Ratings update automatically when matches are reported.
+              Confirmed singles and doubles results build your season rating.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Leaderboard currentUserId={user.id} profiles={data.profiles} />
+            <Button asChild variant="outline" className="mt-4 w-full"><Link href="/protected/seasons">Explore seasons & champions</Link></Button>
           </CardContent>
         </Card>
       </section>
 
-      <Card id="tournaments" className="rounded-md shadow-sm">
+      <Card id="tournaments" className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Trophy className="size-5" />
@@ -384,18 +393,19 @@ async function Dashboard() {
       </Card>
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1fr]">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Check className="size-5" />
               Report match
             </CardTitle>
             <CardDescription>
-              Casual matches need opponent confirmation before ratings change.
+              Report matches played in the current season only. Confirm before the season closes; unconfirmed reports expire.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form action={submitCasualMatchReport} className="grid gap-4">
+              <SeasonInput />
               <PlayerSelect label="Opponent" name="opponent_id" profiles={rivals} />
               <div className="grid gap-2">
                 <Label htmlFor="result">Winner</Label>
@@ -439,13 +449,13 @@ async function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Swords className="size-5" />
               Recent results
             </CardTitle>
-            <CardDescription>Latest completed rated matches.</CardDescription>
+            <CardDescription>Latest confirmed singles results in this season.</CardDescription>
           </CardHeader>
           <CardContent>
             <RecentResults results={recentResults} />
@@ -470,7 +480,7 @@ function StatTile({
   value: number;
 }) {
   return (
-    <div className="rounded-md border bg-card p-4 sm:p-5">
+    <div className="rounded-2xl border bg-card p-4 sm:p-5">
       <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
         <p className="text-sm">{label}</p>
@@ -592,7 +602,7 @@ function MatchReportCard({
 
 function ReportDetail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border bg-card px-3 py-2">
+    <div className="rounded-2xl border bg-card px-3 py-2">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 truncate font-medium">{value}</p>
     </div>

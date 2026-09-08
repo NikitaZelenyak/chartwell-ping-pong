@@ -83,7 +83,7 @@ export function Leaderboard({
         const meta = rankMeta(rank);
         const isCurrentUser = profile.id === currentUserId;
 
-        if (rank === 1) {
+        if (rank === 1 && (profile.wins ?? 0) > 0) {
           return (
             <ChampionCard
               isCurrentUser={isCurrentUser}
@@ -207,7 +207,7 @@ function ChampionCard({
           <div className="sm:hidden">
             <div className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-semibold text-amber-950 shadow-sm">
               <Trophy className="size-3.5" />
-              Current Champion
+              Season leader
             </div>
           </div>
         </div>
@@ -216,7 +216,7 @@ function ChampionCard({
           <div className="hidden items-center gap-2 sm:flex">
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-semibold text-amber-950 shadow-sm">
               <Trophy className="size-3.5" />
-              Current Champion
+              Season leader
             </span>
             {isCurrentUser ? (
               <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">

@@ -32,6 +32,10 @@ type Profile = {
   rating: number | null;
   wins: number | null;
   losses: number | null;
+  lifetime_wins: number;
+  lifetime_losses: number;
+  lifetime_doubles_wins: number;
+  lifetime_doubles_losses: number;
   doubles_wins: number | null;
   doubles_losses: number | null;
   preferred_hand: string | null;
@@ -85,7 +89,7 @@ async function loadPlayerCard(id: string) {
       supabase
         .from("profiles")
         .select(
-          "id,email,display_name,rating,wins,losses,doubles_wins,doubles_losses,preferred_hand,avatar_style,avatar_seed,bio",
+          "id,email,display_name,rating,wins,losses,doubles_wins,doubles_losses,lifetime_wins,lifetime_losses,lifetime_doubles_wins,lifetime_doubles_losses,preferred_hand,avatar_style,avatar_seed,bio",
         )
         .eq("id", id)
         .maybeSingle(),
@@ -98,7 +102,11 @@ async function loadPlayerCard(id: string) {
         .from("doubles_teams")
         .select("id,name,player_one_id,player_two_id,rating,wins,losses")
         .or(`player_one_id.eq.${id},player_two_id.eq.${id}`)
-        .order("rating", { ascending: false }),
+        .order("rating", { ascending: false })
+      .order("wins", { ascending: false })
+      .order("losses", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true }),
       supabase.from("profiles").select("id,email,display_name"),
     ]);
 
@@ -164,7 +172,7 @@ async function PlayerProfileContent({
         </Link>
       </Button>
 
-      <section className="rounded-md border bg-card p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <AvatarThumb
@@ -189,18 +197,20 @@ async function PlayerProfileContent({
           <Badge variant="secondary">{ratingBand(data.profile.rating)}</Badge>
         </div>
         <div className="mt-5 grid grid-cols-2 gap-2 text-sm sm:mt-6 sm:grid-cols-5 sm:gap-3">
-          <ProfileStat label="Rating" value={data.profile.rating ?? 1000} />
-          <ProfileStat label="Wins" value={data.profile.wins ?? 0} />
-          <ProfileStat label="Losses" value={data.profile.losses ?? 0} />
-          <ProfileStat label="Doubles wins" value={data.profile.doubles_wins ?? 0} />
+          <ProfileStat label="Season rating" value={data.profile.rating ?? 1000} />
+          <ProfileStat label="Lifetime wins" value={data.profile.lifetime_wins ?? 0} />
+          <ProfileStat label="Lifetime losses" value={data.profile.lifetime_losses ?? 0} />
+          <ProfileStat label="Season wins" value={data.profile.wins ?? 0} />
+          <ProfileStat label="Season losses" value={data.profile.losses ?? 0} />
+          <ProfileStat label="Lifetime doubles W" value={data.profile.lifetime_doubles_wins ?? 0} />
           <ProfileStat
-            label="Doubles losses"
-            value={data.profile.doubles_losses ?? 0}
+            label="Lifetime doubles L"
+            value={data.profile.lifetime_doubles_losses ?? 0}
           />
         </div>
       </section>
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Swords className="size-5" />
@@ -247,7 +257,7 @@ async function PlayerProfileContent({
         </CardContent>
       </Card>
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Trophy className="size-5" />

@@ -1,3 +1,4 @@
+import { getActiveSeason } from "@/lib/seasons-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -51,6 +52,8 @@ type DoublesTeam = {
   player_one_id: string;
   player_two_id: string;
   rating: number | null;
+  lifetime_wins: number;
+  lifetime_losses: number;
   wins: number | null;
   losses: number | null;
 };
@@ -105,8 +108,12 @@ async function loadDoublesData(userId: string): Promise<DoublesData> {
         .order("display_name", { ascending: true, nullsFirst: false }),
       supabase
         .from("doubles_teams")
-        .select("id,name,created_by,player_one_id,player_two_id,rating,wins,losses")
-        .order("rating", { ascending: false }),
+        .select("id,name,created_by,player_one_id,player_two_id,rating,wins,losses,lifetime_wins,lifetime_losses")
+        .order("rating", { ascending: false })
+      .order("wins", { ascending: false })
+      .order("losses", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true }),
       supabase
         .from("doubles_team_invites")
         .select("id,created_by,invited_user_id,team_name,status,created_at")
@@ -160,6 +167,7 @@ async function DoublesContent() {
   }
 
   const data = await loadDoublesData(user.id);
+  const season = await getActiveSeason();
   const profilesById = new Map(data.profiles.map((profile) => [profile.id, profile]));
   const teamsById = new Map(data.teams.map((team) => [team.id, team]));
   const rivals = data.profiles.filter((profile) => profile.id !== user.id);
@@ -182,18 +190,18 @@ async function DoublesContent() {
 
   return (
     <div className="w-full space-y-6 sm:space-y-8">
-      <section className="rounded-md border bg-card p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Badge className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/10">
-              Doubles
+              {season?.name ?? "Current season"} · Doubles
             </Badge>
             <h1 className="mt-3 text-2xl font-semibold tracking-normal sm:text-3xl">
               Doubles teams
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               Create partner teams, report team matches, and track team ratings
-              plus each player&apos;s match rating.
+              plus each player&apos;s season rating. Team records reset each season; lifetime results stay saved.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 text-sm sm:min-w-56">
@@ -202,6 +210,8 @@ async function DoublesContent() {
           </div>
         </div>
       </section>
+
+      <Link href="/protected/seasons?kind=team" className="inline-flex text-sm font-semibold text-primary hover:underline">Explore doubles seasons & champions →</Link>
 
       {data.setupError ? (
         <div className="flex gap-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
@@ -217,7 +227,7 @@ async function DoublesContent() {
       ) : null}
 
       <section className="grid gap-6 lg:grid-cols-[0.85fr_1fr]">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Send className="size-5" />
@@ -258,7 +268,7 @@ async function DoublesContent() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <UsersRound className="size-5" />
@@ -326,7 +336,7 @@ async function DoublesContent() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[0.85fr_1fr]">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Pencil className="size-5" />
@@ -370,13 +380,14 @@ async function DoublesContent() {
                 </form>
               </div>
             ))}
+            {myTeams.length > 0 && <div className="rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground"><p className="mb-2 font-semibold uppercase tracking-wider">Lifetime team records</p>{myTeams.map(team => <p key={team.id}>{team.name}: {team.lifetime_wins ?? 0} wins · {team.lifetime_losses ?? 0} losses</p>)}</div>}
             {myTeams.length === 0 ? (
               <EmptyState text="Create or accept a team invite to start doubles." />
             ) : null}
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Trophy className="size-5" />
@@ -387,12 +398,12 @@ async function DoublesContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DoublesMatchReportForm myTeams={myTeams} teams={data.teams} />
+            <DoublesMatchReportForm myTeams={myTeams} teams={data.teams} seasonId={season?.id ?? ""} />
           </CardContent>
         </Card>
       </section>
 
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Check className="size-5" />
@@ -454,7 +465,7 @@ async function DoublesContent() {
       </Card>
 
       <section>
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">Doubles team leaderboard</CardTitle>
             <CardDescription>Teams are ranked by shared doubles rating.</CardDescription>

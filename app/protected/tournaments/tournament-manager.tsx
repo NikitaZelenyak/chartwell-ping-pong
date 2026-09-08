@@ -130,7 +130,7 @@ export function TournamentManager({
 
   if (tournamentGames.length === 0) {
     return (
-      <Card className="rounded-md shadow-sm">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Swords className="size-5" />
@@ -145,7 +145,7 @@ export function TournamentManager({
   }
 
   return (
-    <Card className="rounded-md shadow-sm">
+    <Card className="rounded-2xl shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <Swords className="size-5" />
@@ -231,7 +231,7 @@ export function TournamentManager({
 
                 return (
                   <div
-                    className="rounded-md border bg-card p-3 shadow-sm"
+                    className="rounded-2xl border bg-card p-3 shadow-sm"
                     key={round}
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
@@ -476,7 +476,7 @@ function PlayerLine({
   won: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[4.5rem_1fr_auto] items-center gap-2 rounded-md border bg-card px-2 py-2">
+    <div className="grid grid-cols-[4.5rem_1fr_auto] items-center gap-2 rounded-2xl border bg-card px-2 py-2">
       <span className="text-xs text-muted-foreground">{label}</span>
       <span className="min-w-0 truncate font-medium">{displayPlayer(player)}</span>
       {won ? (

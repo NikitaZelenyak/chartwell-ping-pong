@@ -1,3 +1,4 @@
+import { SeasonInput } from "@/components/season-banner";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Check, Pencil, Send, ShieldAlert, Swords, Trash2, X } from "lucide-react";
@@ -132,7 +133,7 @@ async function InvitesContent() {
 
   return (
     <div className="w-full space-y-6 sm:space-y-8">
-      <section className="rounded-md border bg-card p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Badge className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/10">
@@ -164,7 +165,7 @@ async function InvitesContent() {
       ) : null}
 
       <section className="grid gap-6 lg:grid-cols-[0.85fr_1fr]">
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Send className="size-5" />
@@ -193,7 +194,7 @@ async function InvitesContent() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-md shadow-sm">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Swords className="size-5" />
@@ -420,6 +421,7 @@ function InviteResultForm({
       action={submitCasualMatchReport}
       className="mt-4 grid gap-3 rounded-md border border-primary/15 bg-primary/5 p-3"
     >
+      <SeasonInput />
       <input type="hidden" name="invite_id" value={inviteId} />
       <input type="hidden" name="opponent_id" value={opponentId} />
       <div className="grid gap-3 sm:grid-cols-[1fr_0.9fr_auto] sm:items-end">
@@ -463,6 +465,7 @@ function InviteAction({
 }) {
   return (
     <form action={respondToInvite} className="w-full sm:w-auto">
+      <SeasonInput />
       <input type="hidden" name="invite_id" value={inviteId} />
       <input type="hidden" name="status" value={status} />
       <SubmitButton pendingLabel="Updating…" size="sm" variant="outline" className="w-full sm:w-auto">
@@ -476,6 +479,7 @@ function InviteAction({
 function DeleteInviteAction({ inviteId }: { inviteId: string }) {
   return (
     <form action={deleteInvite} className="w-full sm:w-auto">
+      <SeasonInput />
       <input type="hidden" name="invite_id" value={inviteId} />
       <SubmitButton pendingLabel="Removing…" size="sm" variant="destructive" className="w-full sm:w-auto">
         <Trash2 className="size-4" />

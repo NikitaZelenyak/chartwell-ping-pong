@@ -497,3 +497,33 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Seasonal court: warm paper, evergreen surfaces, and restrained rally motion. */
+@layer base {
+  :root:not(.dark) { --background: 42 40% 97%; --muted: 44 24% 92%; --border: 145 15% 83%; --accent: 43 75% 89%; --accent-foreground: 153 44% 19%; --radius: 0.9rem; }
+  body { font-feature-settings: "ss01" on; }
+  h1, h2 { text-wrap: balance; }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+}
+@layer components {
+  .season-panel { @apply rounded-2xl border bg-card text-card-foreground; box-shadow: 0 4px 22px -16px hsl(var(--foreground) / .25); }
+  .season-eyebrow { @apply text-xs font-semibold uppercase tracking-widest text-muted-foreground; }
+  .season-hero { background: radial-gradient(ellipse at 90% 10%, #628756 0, transparent 45%), linear-gradient(120deg, #103d31, #1f5541 55%, #4a663b); box-shadow: 0 14px 40px -24px #103d3190; }
+  .season-orbit { position: absolute; width: 26rem; height: 26rem; right: -8rem; top: -9rem; border: 1px solid #ffffff20; border-radius: 50%; }
+  .season-orbit::after { content: ""; position: absolute; top: 50%; left: -7px; width: 14px; height: 14px; border-radius: 100%; background: #fcd68b; box-shadow: 0 0 30px #fcd68b55; }
+  .season-orbit-two { width: 35rem; height: 35rem; right: -12.5rem; top: -13.5rem; opacity: .45; }
+  .season-shell.court-stripes { background-image: radial-gradient(ellipse at 2% 0%, hsl(var(--secondary) / .65), transparent 42%), radial-gradient(ellipse at 95% 45%, hsl(var(--primary) / .055), transparent 45%); background-size: 100% 100%; background-position: center; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .season-page > *, .season-shell .season-content > div > section { animation: rise-in 500ms ease-out both; }
+  .season-page > :nth-child(2) { animation-delay: 65ms; }
+  .season-page > :nth-child(3) { animation-delay: 120ms; }
+  .season-page > :nth-child(4) { animation-delay: 170ms; }
+  .season-orbit { animation: season-orbit 30s linear infinite; }
+  .season-orbit-two { animation-direction: reverse; animation-duration: 45s; }
+  .season-progress { animation: season-progress 850ms cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
+  .season-panel { transition: box-shadow 220ms ease, border-color 220ms ease; }
+  .season-panel:hover { box-shadow: 0 8px 28px -18px hsl(var(--foreground) / .25); }
+}
+@keyframes season-orbit { to { transform: rotate(360deg); } }
+@keyframes season-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
