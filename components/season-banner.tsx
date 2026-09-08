@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { ArrowUpRight, Leaf } from "lucide-react";
 import { getActiveSeason } from "@/lib/seasons-server";
 import { seasonDate } from "@/lib/seasons";

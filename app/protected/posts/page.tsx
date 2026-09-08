@@ -1,11 +1,11 @@
 import { ChevronLeft, ChevronRight, MessagesSquare, ShieldAlert } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { PostCard } from "@/components/posts/post-card";
 import { PostComposer } from "@/components/posts/post-forms";
-import { PingPongLoader } from "@/components/ping-pong-loader";
+import { ScoreboardSkeleton } from "@/components/ping-pong-loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,7 +69,7 @@ async function PostsContent({
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6 sm:gap-8">
-      <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+      <section className="arena-page-header season-panel overflow-hidden">
         <div className="relative p-4 sm:p-6">
           <div
             aria-hidden="true"
@@ -166,5 +166,5 @@ async function PostsContent({
 }
 
 function PostsFallback() {
-  return <PingPongLoader className="sm:min-h-[34rem]" label="Loading community posts…" />;
+  return <ScoreboardSkeleton kind="posts" label="Loading community posts…" />;
 }

@@ -24,7 +24,7 @@ export function RecentResults({ results }: { results: RecentResult[] }) {
 
   if (results.length === 0) {
     return (
-      <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
         No match results reported yet.
       </div>
     );
@@ -33,7 +33,7 @@ export function RecentResults({ results }: { results: RecentResult[] }) {
   return (
     <div className="space-y-3">
       {visibleResults.map((match) => (
-        <div className="rounded-md border p-4" key={match.id}>
+        <div className="rounded-xl border p-4" key={match.id}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="break-words font-medium">

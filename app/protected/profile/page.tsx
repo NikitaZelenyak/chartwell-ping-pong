@@ -15,7 +15,7 @@ import { AchievementsPanel } from "@/components/achievements-panel";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { PingPongLoader } from "@/components/ping-pong-loader";
+import { ScoreboardSkeleton } from "@/components/ping-pong-loader";
 import {
   Card,
   CardContent,
@@ -158,7 +158,7 @@ async function ProfileContent() {
 
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6">
-      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
+      <section className="arena-page-header season-panel p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <AvatarThumb
@@ -282,7 +282,7 @@ async function ProfileContent() {
 }
 
 function ProfileFallback() {
-  return <PingPongLoader label="Loading profile..." className="sm:min-h-[24rem]" />;
+  return <ScoreboardSkeleton kind="profile" label="Loading profile..." />;
 }
 
 function ProfileStat({ label, value }: { label: string; value: number }) {

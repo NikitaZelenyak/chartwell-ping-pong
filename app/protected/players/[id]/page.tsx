@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ArrowLeft, Crown, Medal, Sparkles, Swords, Trophy } from "lucide-react";
@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PingPongLoader } from "@/components/ping-pong-loader";
+import { ScoreboardSkeleton } from "@/components/ping-pong-loader";
 import {
   achievementRewardTier,
   avatarUrl,
@@ -172,7 +172,7 @@ async function PlayerProfileContent({
         </Link>
       </Button>
 
-      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
+      <section className="arena-page-header season-panel p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <AvatarThumb
@@ -273,7 +273,7 @@ async function PlayerProfileContent({
 }
 
 function PlayerProfileFallback() {
-  return <PingPongLoader label="Loading player card..." className="sm:min-h-[24rem]" />;
+  return <ScoreboardSkeleton kind="profile" label="Loading player card..." />;
 }
 
 function ProfileStat({ label, value }: { label: string; value: number }) {

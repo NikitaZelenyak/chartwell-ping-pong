@@ -1,5 +1,5 @@
 import { MessageCircle, Video } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 
 import { PostAvatar } from "@/components/posts/post-avatar";
 import {
@@ -38,7 +38,7 @@ export function PostCard({
   return (
     <article
       className={cn(
-        "scroll-mt-24 rounded-md border bg-card shadow-sm",
+        "season-panel scroll-mt-24",
         detail && "shadow-md",
       )}
       id={`post-${post.id}`}

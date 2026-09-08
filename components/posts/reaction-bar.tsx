@@ -72,13 +72,19 @@ export function ReactionBar({
     }
   }, [currentReaction, isPending, pingCount, pongCount]);
 
+  useEffect(() => {
+    if (!animation) return;
+    const timer = setTimeout(() => setAnimation(null), 700);
+    return () => clearTimeout(timer);
+  }, [animation]);
+
   function react(reaction: PostReaction) {
     if (isPending) {
       return;
     }
 
     setStatus("");
-    setAnimation({ reaction, key: Date.now() });
+    setAnimation(null);
 
     startTransition(async () => {
       setOptimistic(reaction);
@@ -89,6 +95,7 @@ export function ReactionBar({
         return;
       }
 
+      if (result.currentReaction) setAnimation({ reaction, key: Date.now() });
       setConfirmed({
         pingCount: result.pingCount,
         pongCount: result.pongCount,

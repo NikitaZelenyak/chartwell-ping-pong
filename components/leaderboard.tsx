@@ -1,7 +1,7 @@
 "use client";
 
 import { Crown, Medal, Sparkles, Trophy } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";

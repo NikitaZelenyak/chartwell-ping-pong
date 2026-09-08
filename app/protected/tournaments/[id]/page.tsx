@@ -1,6 +1,6 @@
 import { getSeasons } from "@/lib/seasons-server";
 import { isAppAdmin } from "@/lib/admin-server";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -190,7 +190,7 @@ async function TournamentDetail({ params }: { params: Promise<{ id: string }> })
       ) : null}
 
       {!isCurrentSeason && <p className="rounded-xl border bg-muted/60 p-4 text-sm text-muted-foreground">This tournament belongs to an archived season. Its rated results are frozen. Create a new tournament to play in the current season.</p>}
-      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+      <section className="arena-page-header season-panel p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap gap-2">

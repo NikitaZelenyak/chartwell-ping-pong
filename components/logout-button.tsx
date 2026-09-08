@@ -1,8 +1,9 @@
 "use client";
+import { RallyIndicator } from "@/components/rally-court";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LoaderCircle, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useState } from "react";
 
 export function LogoutButton() {
@@ -21,6 +22,7 @@ export function LogoutButton() {
 
   return (
     <Button
+      className="w-11 px-0 sm:w-36"
       aria-busy={isLoading}
       aria-label={isLoading ? "Logging out" : "Log out"}
       disabled={isLoading}
@@ -29,7 +31,7 @@ export function LogoutButton() {
       variant="outline"
     >
       {isLoading ? (
-        <LoaderCircle className="animate-spin" />
+        <RallyIndicator />
       ) : (
         <LogOut />
       )}

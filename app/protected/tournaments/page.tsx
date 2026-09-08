@@ -1,7 +1,7 @@
 import { getSeasons } from "@/lib/seasons-server";
 import { isAppAdmin } from "@/lib/admin-server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 import {
   CalendarDays,
@@ -164,7 +164,7 @@ async function Tournaments() {
         </div>
       ) : null}
 
-      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+      <section className="arena-page-header season-panel p-5 sm:p-7">
         <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
           Tournament desk
         </Badge>

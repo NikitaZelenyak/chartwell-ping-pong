@@ -6,7 +6,7 @@ import { PinPongMark } from "@/components/pinpong-mark";
 import { ProtectedNavLinks } from "@/components/protected-nav-links";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 
 export default function ProtectedLayout({
@@ -18,12 +18,12 @@ export default function ProtectedLayout({
     <main className="season-shell court-stripes flex min-h-screen flex-col items-center">
       <div className="flex w-full flex-1 flex-col items-center gap-5 sm:gap-8">
         <nav className="sticky top-0 z-40 flex min-h-16 w-full justify-center border-b border-b-primary/15 bg-background/90 shadow-sm shadow-primary/5 backdrop-blur-lg">
-          <div className="flex w-full max-w-6xl items-center justify-between gap-2 px-3 py-2.5 text-sm sm:px-5">
+          <div className="flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-2.5 text-sm sm:px-5">
             <div className="flex min-w-0 items-center gap-2 font-semibold sm:gap-4">
               <Link href={"/"} className="flex min-w-0 items-center gap-2">
                 <PinPongMark animated className="size-8" />
                 <span className="hidden truncate min-[390px]:inline">
-                  Chartwell Ping Pong
+                  PinPong
                 </span>
                 <span className="truncate min-[390px]:hidden">PinPong</span>
               </Link>

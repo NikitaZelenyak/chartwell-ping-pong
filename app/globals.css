@@ -4,56 +4,56 @@
 
 @layer base {
   :root {
-    --background: 165 60% 98%;
-    --foreground: 168 36% 9%;
+    --background: 200 30% 97%;
+    --foreground: 220 24% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 168 28% 10%;
+    --card-foreground: 220 22% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 168 28% 10%;
-    --primary: 160 88% 32%;
+    --popover-foreground: 220 22% 13%;
+    --primary: 190 92% 28%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 46 100% 87%;
-    --secondary-foreground: 36 94% 22%;
-    --muted: 171 44% 93%;
-    --muted-foreground: 176 16% 38%;
-    --accent: 188 95% 88%;
+    --secondary: 80 72% 86%;
+    --secondary-foreground: 85 70% 18%;
+    --muted: 210 20% 92%;
+    --muted-foreground: 215 15% 39%;
+    --accent: 190 60% 91%;
     --accent-foreground: 188 92% 20%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 75% 42%;
     --destructive-foreground: 0 0% 98%;
-    --border: 174 36% 82%;
-    --input: 174 36% 82%;
-    --ring: 160 88% 32%;
-    --chart-1: 160 88% 32%;
+    --border: 210 19% 82%;
+    --input: 210 19% 82%;
+    --ring: 190 92% 28%;
+    --chart-1: 190 92% 28%;
     --chart-2: 190 88% 46%;
     --chart-3: 349 92% 63%;
-    --chart-4: 45 100% 60%;
+    --chart-4: 25 95% 59%;
     --chart-5: 265 82% 62%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 168 28% 8%;
-    --foreground: 165 18% 96%;
-    --card: 168 26% 10%;
-    --card-foreground: 165 18% 96%;
-    --popover: 168 26% 10%;
-    --popover-foreground: 165 18% 96%;
-    --primary: 160 72% 42%;
-    --primary-foreground: 168 28% 8%;
-    --secondary: 38 86% 18%;
-    --secondary-foreground: 44 96% 86%;
-    --muted: 166 22% 15%;
-    --muted-foreground: 166 12% 68%;
+    --background: 225 19% 7%;
+    --foreground: 200 20% 96%;
+    --card: 223 18% 11%;
+    --card-foreground: 200 20% 96%;
+    --popover: 223 18% 11%;
+    --popover-foreground: 200 20% 96%;
+    --primary: 185 85% 59%;
+    --primary-foreground: 225 19% 7%;
+    --secondary: 82 36% 17%;
+    --secondary-foreground: 80 78% 75%;
+    --muted: 220 17% 16%;
+    --muted-foreground: 215 15% 70%;
     --accent: 190 64% 18%;
     --accent-foreground: 190 72% 88%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 166 20% 20%;
-    --input: 166 20% 20%;
-    --ring: 160 72% 42%;
-    --chart-1: 160 72% 42%;
+    --destructive: 0 80% 70%;
+    --destructive-foreground: 0 40% 12%;
+    --border: 220 15% 24%;
+    --input: 220 15% 24%;
+    --ring: 185 85% 59%;
+    --chart-1: 185 85% 59%;
     --chart-2: 190 72% 54%;
     --chart-3: 349 84% 67%;
-    --chart-4: 44 96% 62%;
+    --chart-4: 25 95% 65%;
     --chart-5: 265 68% 68%;
   }
 }
@@ -71,53 +71,6 @@
 }
 
 @layer utilities {
-  .animate-pinpong-ball {
-    animation: pinpong-ball 1.45s ease-in-out infinite alternate;
-  }
-
-  .animate-ping-pong-swing {
-    animation: ping-pong-swing 1.4s ease-in-out infinite;
-  }
-
-  .animate-ping-pong-handle {
-    animation: ping-pong-handle 1.4s ease-in-out infinite;
-  }
-
-  .animate-ping-pong-ball {
-    animation: ping-pong-ball 1.4s ease-in-out infinite;
-  }
-
-  .animate-loader-ball {
-    animation: loader-ball 920ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  }
-
-  .animate-court-ball {
-    animation: court-ball 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  }
-
-  .animate-ball-trail-one {
-    animation: ball-trail-one 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  }
-
-  .animate-ball-trail-two {
-    animation: ball-trail-two 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  }
-
-  .animate-left-paddle {
-    animation: left-paddle 2.8s ease-in-out infinite;
-  }
-
-  .animate-right-paddle {
-    animation: right-paddle 2.8s ease-in-out infinite;
-  }
-
-  .animate-live-ping {
-    animation: live-ping 1.45s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
-
-  .animate-score-pulse {
-    animation: score-pulse 2.1s ease-in-out infinite;
-  }
 
   .animate-float-in {
     animation: float-in 560ms ease-out both;
@@ -125,10 +78,6 @@
 
   .animate-rise-in {
     animation: rise-in 620ms ease-out both;
-  }
-
-  .animate-navigation-progress {
-    animation: navigation-progress 1.1s ease-in-out infinite;
   }
 
   .animate-mobile-menu-in {
@@ -155,216 +104,6 @@
     animation: published-post 1200ms ease-out both;
   }
 
-  .court-stripes {
-    background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(
-        circle at 12% 18%,
-        hsl(var(--chart-4) / 0.24) 0 0.55rem,
-        transparent 0.6rem
-      ),
-      radial-gradient(
-        circle at 82% 32%,
-        hsl(var(--chart-3) / 0.18) 0 0.5rem,
-        transparent 0.55rem
-      ),
-      radial-gradient(
-        circle at 30% 78%,
-        hsl(var(--chart-2) / 0.15) 0 0.38rem,
-        transparent 0.42rem
-      ),
-      repeating-radial-gradient(
-        circle at 78% 18%,
-        hsl(var(--primary) / 0.12) 0 1px,
-        transparent 1px 14px
-      ),
-      linear-gradient(
-        118deg,
-        transparent 0 12%,
-        hsl(var(--primary) / 0.08) 12.2% 12.6%,
-        transparent 12.8% 38%,
-        hsl(var(--accent) / 0.26) 38.2% 54%,
-        transparent 54.4% 100%
-      ),
-      linear-gradient(
-        152deg,
-        hsl(var(--secondary) / 0.26),
-        transparent 30%,
-        hsl(var(--chart-2) / 0.10) 72%,
-        transparent
-      );
-    background-attachment: fixed;
-    background-position:
-      left 3rem top 5rem,
-      right 9rem top 13rem,
-      left 28% bottom 8rem,
-      right 3rem top 4rem,
-      center top,
-      center;
-    background-repeat: no-repeat;
-    background-size:
-      10rem 10rem,
-      12rem 12rem,
-      8rem 8rem,
-      16rem 16rem,
-      100% 46rem,
-      100% 100%;
-  }
-}
-
-@keyframes pinpong-ball {
-  from {
-    transform: translate3d(-3px, 3px, 0);
-  }
-  to {
-    transform: translate3d(4px, -4px, 0);
-  }
-}
-
-@keyframes ping-pong-swing {
-  0%,
-  100% {
-    transform: rotate(-18deg) translate3d(0, 0, 0);
-  }
-  42% {
-    transform: rotate(10deg) translate3d(2px, 1px, 0);
-  }
-  58% {
-    transform: rotate(-6deg) translate3d(1px, 0, 0);
-  }
-}
-
-@keyframes ping-pong-handle {
-  0%,
-  100% {
-    transform: rotate(45deg) translate3d(0, 0, 0);
-  }
-  42% {
-    transform: rotate(58deg) translate3d(1px, -1px, 0);
-  }
-  58% {
-    transform: rotate(49deg) translate3d(0, 0, 0);
-  }
-}
-
-@keyframes ping-pong-ball {
-  0%,
-  100% {
-    transform: translate3d(4px, -3px, 0) scale(0.95);
-  }
-  42% {
-    transform: translate3d(-4px, 4px, 0) scale(1);
-  }
-  58% {
-    transform: translate3d(-1px, 1px, 0) scale(0.98);
-  }
-}
-
-@keyframes loader-ball {
-  0%,
-  100% {
-    transform: translate3d(-50%, 0, 0) scale(1, 1);
-  }
-  48% {
-    transform: translate3d(-50%, 36px, 0) scale(1.08, 0.92);
-  }
-  58% {
-    transform: translate3d(-50%, 31px, 0) scale(0.94, 1.08);
-  }
-}
-
-@keyframes court-ball {
-  0% {
-    transform: translate3d(-210%, -190%, 0) scale(0.92);
-  }
-  24% {
-    transform: translate3d(-44%, -58%, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(208%, 142%, 0) scale(0.9);
-  }
-  76% {
-    transform: translate3d(46%, 22%, 0) scale(1.04);
-  }
-  100% {
-    transform: translate3d(-210%, -190%, 0) scale(0.92);
-  }
-}
-
-@keyframes ball-trail-one {
-  0% {
-    opacity: 0.16;
-    transform: translate3d(-260%, -214%, 0) scale(0.7);
-  }
-  24% {
-    opacity: 0.34;
-    transform: translate3d(-88%, -82%, 0) scale(0.9);
-  }
-  50% {
-    opacity: 0.2;
-    transform: translate3d(158%, 112%, 0) scale(0.76);
-  }
-  76% {
-    opacity: 0.38;
-    transform: translate3d(4%, 0%, 0) scale(0.92);
-  }
-  100% {
-    opacity: 0.16;
-    transform: translate3d(-260%, -214%, 0) scale(0.7);
-  }
-}
-
-@keyframes ball-trail-two {
-  0% {
-    opacity: 0.1;
-    transform: translate3d(-308%, -236%, 0) scale(0.54);
-  }
-  50% {
-    opacity: 0.16;
-    transform: translate3d(112%, 86%, 0) scale(0.66);
-  }
-  100% {
-    opacity: 0.1;
-    transform: translate3d(-308%, -236%, 0) scale(0.54);
-  }
-}
-
-@keyframes left-paddle {
-  0%,
-  100% {
-    transform: translate3d(0, -14px, 0);
-  }
-  48% {
-    transform: translate3d(0, 32px, 0);
-  }
-}
-
-@keyframes right-paddle {
-  0%,
-  100% {
-    transform: translate3d(0, 28px, 0);
-  }
-  52% {
-    transform: translate3d(0, -30px, 0);
-  }
-}
-
-@keyframes live-ping {
-  75%,
-  100% {
-    transform: scale(2.2);
-    opacity: 0;
-  }
-}
-
-@keyframes score-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.035);
-  }
 }
 
 @keyframes float-in {
@@ -386,18 +125,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes navigation-progress {
-  0% {
-    transform: translateX(-110%);
-  }
-  55% {
-    transform: translateX(110%);
-  }
-  100% {
-    transform: translateX(230%);
   }
 }
 
@@ -498,32 +225,99 @@
   }
 }
 
-/* Seasonal court: warm paper, evergreen surfaces, and restrained rally motion. */
+/* Shared season surfaces. */
 @layer base {
-  :root:not(.dark) { --background: 42 40% 97%; --muted: 44 24% 92%; --border: 145 15% 83%; --accent: 43 75% 89%; --accent-foreground: 153 44% 19%; --radius: 0.9rem; }
+  :root { --radius: 0.9rem; }
   body { font-feature-settings: "ss01" on; }
   h1, h2 { text-wrap: balance; }
   button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }
 @layer components {
-  .season-panel { @apply rounded-2xl border bg-card text-card-foreground; box-shadow: 0 4px 22px -16px hsl(var(--foreground) / .25); }
+  .season-panel { @apply min-w-0 rounded-2xl border bg-card text-card-foreground; box-shadow: 0 4px 22px -16px hsl(var(--foreground) / .25); }
   .season-eyebrow { @apply text-xs font-semibold uppercase tracking-widest text-muted-foreground; }
-  .season-hero { background: radial-gradient(ellipse at 90% 10%, #628756 0, transparent 45%), linear-gradient(120deg, #103d31, #1f5541 55%, #4a663b); box-shadow: 0 14px 40px -24px #103d3190; }
-  .season-orbit { position: absolute; width: 26rem; height: 26rem; right: -8rem; top: -9rem; border: 1px solid #ffffff20; border-radius: 50%; }
-  .season-orbit::after { content: ""; position: absolute; top: 50%; left: -7px; width: 14px; height: 14px; border-radius: 100%; background: #fcd68b; box-shadow: 0 0 30px #fcd68b55; }
-  .season-orbit-two { width: 35rem; height: 35rem; right: -12.5rem; top: -13.5rem; opacity: .45; }
-  .season-shell.court-stripes { background-image: radial-gradient(ellipse at 2% 0%, hsl(var(--secondary) / .65), transparent 42%), radial-gradient(ellipse at 95% 45%, hsl(var(--primary) / .055), transparent 45%); background-size: 100% 100%; background-position: center; }
+  .season-hero { background: radial-gradient(ellipse at 100% 0%, #155563 0, transparent 60%), linear-gradient(120deg, #171d2b, #14242e); box-shadow: 0 16px 40px -24px #04151d90; border: 1px solid #58dce833; }
+
 }
 @media (prefers-reduced-motion: no-preference) {
-  .season-page > *, .season-shell .season-content > div > section { animation: rise-in 500ms ease-out both; }
-  .season-page > :nth-child(2) { animation-delay: 65ms; }
-  .season-page > :nth-child(3) { animation-delay: 120ms; }
-  .season-page > :nth-child(4) { animation-delay: 170ms; }
-  .season-orbit { animation: season-orbit 30s linear infinite; }
-  .season-orbit-two { animation-direction: reverse; animation-duration: 45s; }
+  .arena-header, .auth-intro { animation: rise-in 420ms ease-out both; }
+
   .season-progress { animation: season-progress 850ms cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
   .season-panel { transition: box-shadow 220ms ease, border-color 220ms ease; }
   .season-panel:hover { box-shadow: 0 8px 28px -18px hsl(var(--foreground) / .25); }
 }
-@keyframes season-orbit { to { transform: rotate(360deg); } }
+
 @keyframes season-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Arcade arena: shared surfaces and a single, synchronized rally vocabulary. */
+@layer base {
+  body { font-variant-numeric: tabular-nums; }
+  h1, h2, h3 { letter-spacing: -.035em; }
+  h1 { font-weight: 850; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), textarea, select { min-height: 2.75rem; }
+  :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 4px; }
+}
+@layer components {
+  .season-panel { border-radius: 1.25rem; box-shadow: 0 5px 0 -3px hsl(var(--border) / .6), 0 15px 35px -28px hsl(var(--foreground) / .3); }
+  .season-shell.court-stripes, .court-stripes { background-image: radial-gradient(ellipse at 5% 0%, hsl(var(--primary) / .08), transparent 45%), radial-gradient(ellipse at 95% 70%, hsl(var(--secondary) / .2), transparent 40%); background-size: 100% 100%; }
+  .season-eyebrow { color: hsl(var(--primary)); font-weight: 750; letter-spacing: .18em; }
+  .arena-header { padding: .5rem 0 1rem; border-bottom: 1px solid hsl(var(--border)); }
+  .personal-scoreboard { border-top: 3px solid hsl(var(--primary)); background-image: linear-gradient(125deg, hsl(var(--primary) / .07), transparent 65%); }
+  .personal-scoreboard .text-xl, .personal-scoreboard .text-2xl { font-variant-numeric: tabular-nums; font-weight: 800; }
+  .arena-showcase { position: relative; background-image: radial-gradient(ellipse at top, hsl(var(--primary) / .1), transparent 65%); }
+  .season-content { min-width: 0; }
+  .season-content h1 { letter-spacing: -.04em; }
+  .season-content table { font-variant-numeric: tabular-nums; }
+  .season-content th { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; }
+  .season-content td { padding-top: 1rem; padding-bottom: 1rem; }
+  .season-content nav a[aria-current="page"], nav a[aria-current="page"] { box-shadow: inset 0 -2px hsl(var(--primary)); }
+  .arcade-button { position: relative; isolation: isolate; font-weight: 650; }
+  .arcade-button:active::after { content: ""; position: absolute; right: .4rem; top: .35rem; width: .3rem; height: .3rem; border-radius: 50%; background: #ff944d; pointer-events: none; }
+  .skeleton-block { border-radius: .5rem; background: hsl(var(--muted)); }
+  .auth-shell { min-height: 100svh; background-image: radial-gradient(ellipse at top left, hsl(var(--primary) / .12), transparent 60%); }
+  .auth-shell > div > div { min-height: auto; padding: 0; }
+  .auth-shell > div > div > div { max-width: 30rem; margin-inline: auto; }
+}
+.rally-scene { display: inline-block; color: hsl(var(--primary)); vertical-align: middle; }
+.rally-art { display: block; width: 100%; height: auto; overflow: visible; }
+.rally-table { fill: hsl(var(--primary) / .085); stroke: hsl(var(--primary) / .35); stroke-width: 1.5; }
+.rally-lines { stroke: hsl(var(--primary) / .3); stroke-width: 1; }
+.rally-net { stroke: hsl(var(--primary) / .6); stroke-width: 3; stroke-dasharray: 3 4; }
+.rally-paddle { transform-box: fill-box; transform-origin: center; }
+.rally-ball { transform: translate(99px, -20px); }
+.rally-impact { stroke: #ff944d; stroke-width: 2; stroke-linecap: round; opacity: 0; }
+.rally-compact { width: 2rem; height: 1.125rem; flex-shrink: 0; }
+.arcade-button .rally-art { width: 2rem; height: 1.125rem; }
+.rally-compact .rally-table, .rally-compact .rally-lines { opacity: .2; }
+.navigation-court { position: fixed; inset: 0 0 auto; height: 4px; z-index: 100; background: hsl(var(--primary) / .25); pointer-events: none; overflow: hidden; }
+.navigation-court::after { content: ""; position: absolute; left: 50%; height: 100%; border-left: 2px solid hsl(var(--primary)); }
+.navigation-ball { display: block; width: 8px; height: 4px; border-radius: 10px; background: #ff944d; position: absolute; left: 50%; }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion="on"] .rally-ball { animation: arcade-rally 1.8s linear infinite; }
+  html[data-motion="on"] .rally-left { animation: arcade-paddle 1.8s ease-out infinite; }
+  html[data-motion="on"] .rally-right { animation: arcade-paddle 1.8s ease-out -.9s infinite; }
+  html[data-motion="on"] .rally-impact-left { animation: arcade-impact 1.8s ease-out infinite; }
+  html[data-motion="on"] .rally-impact-right { animation: arcade-impact 1.8s ease-out -.9s infinite; }
+  html[data-motion="on"] .navigation-ball { animation: arcade-navigation 1.3s ease-in-out infinite alternate; }
+  .arcade-button:hover > svg { transform: rotate(-9deg); transition: transform 160ms ease-out; }
+}
+@keyframes arcade-rally { 0%,100% { transform: translate(0,0); } 25% { transform: translate(99px,-27px); } 50% { transform: translate(198px,0); } 75% { transform: translate(99px,27px); } }
+@keyframes arcade-paddle { 0%,100% { transform: rotate(-12deg) translateX(3px); } 12%,85% { transform: rotate(0); } }
+@keyframes arcade-impact { 0%,8% { opacity: 1; } 16%,100% { opacity: 0; } }
+@keyframes arcade-navigation { from { transform: translateX(-45vw); } to { transform: translateX(45vw); } }
+.rally-scene[data-paused="true"] *, html[data-tab-hidden="true"] *, html[data-tab-hidden="true"] *::after { animation-play-state: paused !important; }
+html[data-motion="off"] *, html[data-motion="off"] *::before, html[data-motion="off"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html[data-motion="off"] .arcade-button:active, html[data-motion="off"] .arcade-button:hover > svg { transform: none; }
+@media (prefers-reduced-motion: reduce) { .arcade-button:active, .arcade-button:hover > svg { transform: none; } .season-progress { transform: none; } }
+.arena-page-header { position: relative; border-top: 3px solid hsl(var(--primary)); background-image: linear-gradient(115deg, hsl(var(--primary) / .065), transparent 65%); }
+.arena-page-header h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 850; }
+.champion-podium { border-color: hsl(var(--chart-4) / .5); background-image: linear-gradient(135deg, hsl(var(--chart-4) / .12), transparent 75%); border-bottom: 4px solid hsl(var(--chart-4)); }
+html:not([data-motion="on"]) *, html:not([data-motion="on"]) *::before, html:not([data-motion="on"]) *::after { animation: none !important; }
+.season-court-art { position: absolute; width: 26rem; height: 18rem; right: -6rem; top: -4rem; border: 1px solid #ffffff12; transform: rotate(-18deg); }
+.season-court-art::before { content: ""; position: absolute; inset: 1rem; border: 1px solid #ffffff12; }
+.season-court-art::after { content: ""; position: absolute; left: 50%; top: 0; height: 100%; border-left: 2px dashed #ffffff12; }
+@media (prefers-reduced-motion: no-preference) { html[data-motion="on"] a:hover .brand-paddle { transform: rotate(-12deg); } }
+.confirmed-success { border-left: 3px solid hsl(var(--primary)); padding: .65rem .85rem; background: hsl(var(--primary) / .08); border-radius: .4rem; }
+@media (prefers-reduced-motion: no-preference) { html[data-motion="on"] .confirmed-success { animation: rise-in 350ms ease-out both; } }
+
+html[data-motion="off"] :is(.animate-post-reaction-ping, .animate-post-reaction-pong, .animate-post-publish-ball, .animate-post-publish-spark) { display: none; }
+@media (prefers-reduced-motion: reduce) { :is(.animate-post-reaction-ping, .animate-post-reaction-pong, .animate-post-publish-ball, .animate-post-publish-spark) { display: none; } }

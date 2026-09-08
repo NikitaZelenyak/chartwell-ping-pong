@@ -1,7 +1,8 @@
 "use client";
+import { PendingContent } from "@/components/pending-content";
 
-import { Check, LoaderCircle, Pencil, Send, Sparkles, Trash2, X } from "lucide-react";
-import Link from "next/link";
+import { Check, Pencil, Send, Sparkles, Trash2, X } from "lucide-react";
+import Link from "@/components/arcade-link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
@@ -105,20 +106,10 @@ export function PostComposer() {
       </div>
       <FieldError>{state.fieldErrors?.form}</FieldError>
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={pending} type="submit">
-          {pending ? (
-            <>
-              <LoaderCircle className="animate-spin" />
-              Publishing…
-            </>
-          ) : (
-            <>
-              <Send />
-              Publish post
-            </>
-          )}
+        <Button aria-busy={pending} disabled={pending} type="submit">
+          <PendingContent pending={pending} label="Publishing…"><Send />Publish post</PendingContent>
         </Button>
-        {state.ok ? (
+        {state.ok && !pending ? (
           <p aria-live="polite" className="text-sm font-medium text-primary" role="status">
             {state.message}
           </p>
@@ -253,9 +244,8 @@ export function PostEditor({
       </div>
       <FieldError>{state.fieldErrors?.form}</FieldError>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={pending} type="submit">
-          {pending ? <LoaderCircle className="animate-spin" /> : <Check />}
-          {pending ? "Saving…" : "Save changes"}
+        <Button aria-busy={pending} disabled={pending} type="submit">
+          <PendingContent pending={pending} label="Saving…"><Check />Save changes</PendingContent>
         </Button>
         <Button onClick={() => setOpen(false)} type="button" variant="outline">
           Cancel
@@ -313,11 +303,10 @@ export function CommentComposer({ postId }: { postId: string }) {
       </div>
       <FieldError>{state.fieldErrors?.form}</FieldError>
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={pending} type="submit">
-          {pending ? <LoaderCircle className="animate-spin" /> : <Send />}
-          {pending ? "Posting…" : "Post comment"}
+        <Button aria-busy={pending} disabled={pending} type="submit">
+          <PendingContent pending={pending} label="Posting…"><Send />Post comment</PendingContent>
         </Button>
-        {state.ok ? (
+        {state.ok && !pending ? (
           <p aria-live="polite" className="text-sm text-primary" role="status">
             {state.message}
           </p>
@@ -356,9 +345,8 @@ export function CommentOwnerControls({
         <Textarea defaultValue={body} maxLength={COMMENT_BODY_MAX_LENGTH} name="body" />
         <FieldError>{state.fieldErrors?.body ?? state.fieldErrors?.form}</FieldError>
         <div className="flex gap-2">
-          <Button disabled={pending} size="sm" type="submit">
-            {pending ? <LoaderCircle className="animate-spin" /> : <Check />}
-            Save
+          <Button aria-busy={pending} disabled={pending} size="sm" type="submit">
+            <PendingContent pending={pending} label="Saving…"><Check />Save</PendingContent>
           </Button>
           <Button
             onClick={() => setEditing(false)}

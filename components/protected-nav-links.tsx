@@ -2,6 +2,7 @@
 
 import {
   BookOpen,
+  CalendarDays,
   Leaf,
   ShieldCheck,
   ChevronRight,
@@ -13,15 +14,17 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PinPongMark } from "@/components/pinpong-mark";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const links = [
+  { href: "/protected/invites", label: "Invites", description: "Challenge a rival and find your next match", icon: CalendarDays },
   { href: "/protected/seasons", label: "Seasons", description: "Standings, champions, and every past rally", icon: Leaf },
   {
     href: "/protected",
@@ -65,6 +68,8 @@ const links = [
 export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
   const navigationLinks = isAdmin ? [...links, { href: "/protected/admin", label: "Admin", description: "Your private league controls", icon: ShieldCheck, exact: false }] : links;
   const pathname = usePathname();
+  const drawer = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -76,8 +81,18 @@ export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
       return;
     }
 
+    const previousFocus = document.activeElement as HTMLElement | null;
+    drawer.current?.querySelector<HTMLButtonElement>("button")?.focus();
     const previousOverflow = document.body.style.overflow;
     const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const elements = drawer.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+        if (elements?.length) {
+          const first = elements[0], last = elements[elements.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+      }
       if (event.key === "Escape") {
         setOpen(false);
       }
@@ -88,6 +103,7 @@ export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [open]);
@@ -108,6 +124,7 @@ export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
 
       <div className="xl:hidden">
         <Button
+          ref={trigger}
           aria-controls="mobile-navigation"
           aria-expanded={open}
           aria-label="Open navigation menu"
@@ -121,7 +138,7 @@ export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
         </Button>
       </div>
 
-      {open ? (
+      {open ? createPortal(
         <div className="fixed inset-0 z-50 xl:hidden">
           <button
             aria-label="Close navigation menu"
@@ -130,6 +147,8 @@ export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
             type="button"
           />
           <div
+            ref={drawer}
+            aria-label="Player navigation"
             aria-modal="true"
             className="animate-mobile-menu-in absolute inset-x-3 top-3 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-xl border border-primary/20 bg-background p-3 shadow-2xl shadow-foreground/20"
             id="mobile-navigation"
@@ -194,7 +213,7 @@ export function ProtectedNavLinks({ isAdmin = false }: { isAdmin?: boolean }) {
               })}
             </nav>
           </div>
-        </div>
+        </div>, document.body
       ) : null}
     </>
   );
@@ -217,7 +236,7 @@ function NavLink({
     <Link
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-2.5 py-1.5 transition hover:bg-primary/10 hover:text-foreground",
+        "whitespace-nowrap rounded-md px-2.5 py-1.5 transition hover:bg-primary/10 hover:text-foreground",
         active && "bg-primary/10 text-primary shadow-sm",
       )}
       href={href}

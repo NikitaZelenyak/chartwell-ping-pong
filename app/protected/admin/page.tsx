@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ShieldCheck, Settings2, Trophy, MessageSquare } from "lucide-react";

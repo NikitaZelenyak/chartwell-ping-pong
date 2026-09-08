@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { LoaderCircle } from "lucide-react";
+import Link from "@/components/arcade-link";
+import { RallyIndicator } from "@/components/rally-court";
 import { useState } from "react";
 
 export function LoginForm({
@@ -85,7 +85,7 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               <Button
                 aria-busy={isLoading}
                 type="submit"
@@ -94,7 +94,7 @@ export function LoginForm({
               >
                 {isLoading ? (
                   <>
-                    <LoaderCircle className="animate-spin" />
+                    <RallyIndicator />
                     Logging in…
                   </>
                 ) : (

@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PinPongMark } from "@/components/pinpong-mark";
 import {
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
@@ -13,7 +15,10 @@ import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
+import { useMotion } from "@/components/motion-provider";
+
 const ThemeSwitcher = () => {
+  const motion = useMotion();
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -23,7 +28,7 @@ const ThemeSwitcher = () => {
   }, []);
 
   if (!mounted) {
-    return null;
+    return <span aria-hidden="true" className="inline-block size-11 shrink-0" />;
   }
 
   const ICON_SIZE = 16;
@@ -32,12 +37,11 @@ const ThemeSwitcher = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label="Switch theme"
+          aria-label="Appearance settings"
           className="gap-2 border-primary/20 bg-background/80 shadow-sm hover:bg-primary/10"
           variant="outline"
-          size="sm"
+          size="icon"
         >
-          <PinPongMark className="hidden size-6 rounded-sm sm:block" />
           {theme === "light" ? (
             <Sun
               key="light"
@@ -60,6 +64,7 @@ const ThemeSwitcher = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-content" align="start">
+        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={theme}
           onValueChange={(e) => setTheme(e)}
@@ -77,6 +82,9 @@ const ThemeSwitcher = () => {
             <span>System</span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem checked={motion.enabled} onCheckedChange={motion.setEnabled}>Arcade animations</DropdownMenuCheckboxItem>
+        {motion.reduced && <p className="max-w-52 px-2 py-1 text-xs text-muted-foreground">Your device’s reduced motion setting is active.</p>}
       </DropdownMenuContent>
     </DropdownMenu>
   );

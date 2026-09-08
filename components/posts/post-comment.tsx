@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 
 import { PostAvatar } from "@/components/posts/post-avatar";
 import { CommentOwnerControls } from "@/components/posts/post-forms";

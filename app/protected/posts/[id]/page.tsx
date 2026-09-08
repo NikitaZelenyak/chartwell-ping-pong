@@ -1,12 +1,12 @@
 import { ArrowLeft, MessageCircle, ShieldAlert } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { PostCard } from "@/components/posts/post-card";
 import { PostComment } from "@/components/posts/post-comment";
 import { CommentComposer } from "@/components/posts/post-forms";
-import { PingPongLoader } from "@/components/ping-pong-loader";
+import { ScoreboardSkeleton } from "@/components/ping-pong-loader";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -143,5 +143,5 @@ async function PostDetailContent({
 }
 
 function PostDetailFallback() {
-  return <PingPongLoader className="sm:min-h-[34rem]" label="Loading the discussion…" />;
+  return <ScoreboardSkeleton kind="posts" label="Loading the discussion…" />;
 }

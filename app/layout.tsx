@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 import { Suspense } from "react";
 
 import { NavigationFeedback } from "@/components/navigation-feedback";
+import { MotionProvider } from "@/components/motion-provider";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -35,10 +36,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <MotionProvider>
           <Suspense fallback={null}>
             <NavigationFeedback />
           </Suspense>
           {children}
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

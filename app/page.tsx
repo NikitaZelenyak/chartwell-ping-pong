@@ -6,9 +6,10 @@ import {
   Trophy,
   UserRound,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 
+import { RallyCourt } from "@/components/rally-court";
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { PingPongLoader } from "@/components/ping-pong-loader";
@@ -148,19 +149,17 @@ async function HomeContent() {
         </div>
       </nav>
 
-      <section className="court-stripes mx-auto grid w-full max-w-6xl items-center gap-8 px-4 py-8 sm:px-5 sm:py-10 lg:min-h-[calc(100vh-4rem)] lg:grid-cols-[1fr_0.9fr]">
+      <section className="court-stripes mx-auto grid w-full max-w-6xl items-center gap-8 px-4 py-8 sm:px-5 sm:py-10 lg:min-h-[42rem] lg:grid-cols-[1fr_0.9fr]">
         <div className="animate-rise-in max-w-2xl">
           <Badge className="border-primary/20 bg-primary/10 text-primary shadow-sm hover:bg-primary/10">
             <PinPongMark className="mr-1 size-5 rounded-sm" />
-            Rated table tennis tournaments
+            THE CHARTWELL ARENA
           </Badge>
-          <h1 className="mt-5 text-4xl font-semibold tracking-normal text-balance sm:text-6xl">
-            Chartwell Ping Pong
+          <h1 className="mt-5 text-5xl font-black tracking-tight text-balance sm:text-7xl">
+            Every rally.<br /><span className="text-primary">A new rivalry.</span>
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-            Create a player profile, join local tournaments, build doubles
-            teams, and keep every result tied to a rating that moves after each
-            match.
+            Your league. Your season. Your next great match. Find a rival, team up for doubles, and make your mark on the scoreboard.
           </p>
           <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
             <Button asChild size="lg" className="w-full bg-primary shadow-sm shadow-primary/20 hover:bg-primary/90 sm:w-auto">
@@ -205,7 +204,10 @@ async function HomeContent() {
           ) : null}
         </div>
 
-        <div className="animate-float-in rounded-md border border-primary/20 bg-card p-3 shadow-xl shadow-primary/10 sm:p-4">
+        <div className="arena-showcase animate-float-in rounded-3xl border border-primary/20 bg-card p-4 shadow-xl shadow-primary/10 sm:p-6">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground"><span>Meet you at the table</span><span className="text-primary">01 / Rally</span></div>
+          <RallyCourt className="my-4 w-full" />
+          <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest"><span className="size-2 rounded-full bg-primary" />League highlights</div>
           <div className="grid gap-3 sm:gap-4 md:grid-cols-[1fr_0.9fr]">
             <div className="rounded-md border border-primary/15 bg-background/85 p-4 shadow-sm">
               <div className="flex items-center gap-2">

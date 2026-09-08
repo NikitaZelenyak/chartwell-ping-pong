@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, Archive, Crown, Leaf, Trophy, Users } from "lucide-react";
@@ -66,7 +66,7 @@ async function SeasonContent({ searchParams }: { searchParams: Promise<Params> }
   const matchTitle = (m: Result) => `${names.get(m.player_one_id ?? m.team_one_id ?? "") ?? "Player"} vs ${names.get(m.player_two_id ?? m.team_two_id ?? "") ?? "Player"}`;
   return <div className="season-page space-y-6">
     <header className="season-hero relative overflow-hidden rounded-3xl p-6 text-white sm:p-9">
-      <div aria-hidden="true" className="season-orbit" /><div aria-hidden="true" className="season-orbit season-orbit-two" />
+      <div aria-hidden="true" className="season-court-art" />
       <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div><span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">{archived ? <Archive className="size-3.5" /> : <Leaf className="size-3.5" />}{archived ? "Sealed in the history books" : endReached ? "Season complete · awaiting rollover" : "A fresh rally starts here"}</span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-6xl">{season.name}</h1>
@@ -79,7 +79,7 @@ async function SeasonContent({ searchParams }: { searchParams: Promise<Params> }
     </header>
 
     <div className="grid gap-4 sm:grid-cols-3">
-      <div className="season-panel p-5"><p className="season-eyebrow">{archived ? "Season champion" : "Leading the chase"}</p><div className="mt-3 flex items-center gap-3"><Crown className="size-7 shrink-0 text-amber-600 dark:text-amber-300" /><p className="break-words text-xl font-semibold">{leader ? names.get(leader.entity_id) : archived ? "No champion awarded" : "Your story starts now"}</p></div><p className="mt-2 text-xs text-muted-foreground">{leader ? `${leader.snapshot.rating.toLocaleString()} rating · ${leader.snapshot.wins} wins` : "A win is required to qualify."}</p></div>
+      <div className="champion-podium season-panel p-5"><p className="season-eyebrow">{archived ? "Season champion" : "Leading the chase"}</p><div className="mt-3 flex items-center gap-3"><Crown className="size-7 shrink-0 text-amber-600 dark:text-amber-300" /><p className="break-words text-xl font-semibold">{leader ? names.get(leader.entity_id) : archived ? "No champion awarded" : "Your story starts now"}</p></div><p className="mt-2 text-xs text-muted-foreground">{leader ? `${leader.snapshot.rating.toLocaleString()} rating · ${leader.snapshot.wins} wins` : "A win is required to qualify."}</p></div>
       <div className="season-panel p-5"><p className="season-eyebrow">{kind === "team" ? "Teams on the court" : "Players on the court"}</p><p className="mt-3 text-3xl font-semibold tabular-nums">{standings.length}</p><p className="mt-2 text-xs text-muted-foreground">{archived ? "Saved at the season close" : "Everyone starts at 1,000"}</p></div>
       <div className="season-panel p-5"><p className="season-eyebrow">Confirmed {kind === "team" ? "doubles" : "singles"} matches</p><p className="mt-3 text-3xl font-semibold tabular-nums">{results.count ?? 0}</p><p className="mt-2 text-xs text-muted-foreground">Lifetime achievements carry forward</p></div>
     </div>

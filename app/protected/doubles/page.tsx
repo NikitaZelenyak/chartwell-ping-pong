@@ -1,6 +1,6 @@
 import { getActiveSeason } from "@/lib/seasons-server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 import {
   Check,
@@ -190,7 +190,7 @@ async function DoublesContent() {
 
   return (
     <div className="w-full space-y-6 sm:space-y-8">
-      <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
+      <section className="arena-page-header season-panel p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Badge className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/10">

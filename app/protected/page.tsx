@@ -1,7 +1,7 @@
 import { SeasonInput } from "@/components/season-banner";
 import { getActiveSeason } from "@/lib/seasons-server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/arcade-link";
 import { Suspense } from "react";
 import {
   Check,
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Leaderboard } from "@/components/leaderboard";
-import { PingPongLoader } from "@/components/ping-pong-loader";
+import { ScoreboardSkeleton } from "@/components/ping-pong-loader";
 import { RecentResults } from "@/components/recent-results";
 import {
   Card,
@@ -286,7 +286,8 @@ async function Dashboard() {
   });
 
   return (
-    <div className="w-full space-y-6 sm:space-y-10">
+    <div className="w-full space-y-6 sm:space-y-8">
+      <header className="arena-header flex flex-wrap items-end justify-between gap-4"><div><p className="season-eyebrow">Your home court</p><h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Ready for the next rally?</h2></div><Button asChild variant="outline"><Link href="/protected/seasons">Explore seasons</Link></Button></header>
       {data.setupError ? (
         <div className="flex gap-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" />
@@ -302,7 +303,7 @@ async function Dashboard() {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border bg-card p-4 sm:p-5 md:col-span-2">
+        <div className="personal-scoreboard rounded-2xl border bg-card p-4 sm:p-5 md:col-span-2">
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:gap-4">
             <div className="flex min-w-0 items-center gap-3">
               <AvatarThumb
@@ -467,7 +468,7 @@ async function Dashboard() {
 }
 
 function DashboardFallback() {
-  return <PingPongLoader label="Loading Chartwell Ping Pong dashboard..." />;
+  return <ScoreboardSkeleton kind="standings" label="Loading Chartwell Ping Pong dashboard..." />;
 }
 
 function StatTile({

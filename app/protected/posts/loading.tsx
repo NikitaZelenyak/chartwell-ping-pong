@@ -1,5 +1,2 @@
-import { PingPongLoader } from "@/components/ping-pong-loader";
-
-export default function PostsLoading() {
-  return <PingPongLoader className="sm:min-h-[34rem]" label="Loading community posts…" />;
-}
+import { ScoreboardSkeleton } from "@/components/ping-pong-loader";
+export default function Loading() { return <ScoreboardSkeleton kind="posts" label="Loading community posts…" />; }
