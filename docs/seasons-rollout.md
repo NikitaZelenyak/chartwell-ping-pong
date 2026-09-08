@@ -1,6 +1,6 @@
 # Seasons rollout — production review
 
-Status: implemented and tested locally. **The production database has not been migrated.**
+Status: **production database migrated on September 8, 2026 at 09:35:12 America/Toronto**. Migration `20260908090000` is recorded in Supabase. Production postflight passed; the user is handling the Vercel application deployment.
 
 ## Exact first cutover
 
@@ -58,7 +58,9 @@ A unique successor constraint and the expected-season ID make concurrent clicks 
 5. Run `supabase/checks/seasons-postflight.sql` immediately before allowing new results. Its reset-to-1,000 checks are intentionally valid only before new matches are confirmed. Verify the sole admin UUID belongs to the requested account; inspect Summer players/doubles/history and Autumn's fresh tables in the app.
 6. Keep the backup. If an emergency rollback is needed after new results arrive, preserve/export those results first and restore as a coordinated database/application operation; do not blindly copy Summer ratings over newer results.
 
-No production connection is linked in this workspace. Production record counts and the organizer-account match therefore still need the read-only preflight against the actual database. No production credentials or live player data were used for local testing.
+Production preflight and postflight completed using the existing database configuration. The archive contains **11 player snapshots, 15 team snapshots, 43 singles matches, 16 doubles matches, 41 singles reports, and 23 doubles reports**. Two pending singles reports expired; there were no pending doubles reports and no confirmed results recorded on September 8 before cutover. All **48 achievements** remained unchanged. Reset, lifetime-total, and exact-match-history checks returned zero discrepancies.
+
+A full PostgreSQL custom-format backup was saved at `.local-backups/before-seasons-20260908-093247.dump` and fully decoded successfully with `pg_restore` before migration. It is excluded from Git. Production verification output and the migration log are in the same private directory. Local tests and browser previews used synthetic data; production data was only accessed for the requested backup, migration, and verification.
 
 ## Verification performed
 
